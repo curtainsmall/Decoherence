@@ -1,0 +1,78 @@
+# ============================================================
+# Unity 6 / Decoherence — 生成目录与缓存（绝不提交）
+# 基于 github/gitignore 的 Unity 模板，按 Unity 6 项目校正
+# ============================================================
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Bb]uild/
+/[Bb]uilds/
+/[Ll]ogs/
+/[Uu]ser[Ss]ettings/
+
+# 录制与内存快照（体积大，且可能含敏感信息）
+/[Mm]emoryCaptures/
+/[Rr]ecordings/
+
+# Asset Store 工具插件（需要时才纳入版本控制）
+# /[Aa]ssets/AssetStoreTools*
+
+# Unity 崩溃日志
+sysinfo.txt
+
+# 注意：.meta 必须提交。只有当某个资源本身被忽略时，才忽略它的 .meta；
+# 下面这行保证已跟踪资源的 .meta 不被任何忽略规则误伤。
+!/[Aa]ssets/**/*.meta
+
+# Rider / JetBrains 自动生成的编辑器插件
+/[Aa]ssets/Plugins/Editor/JetBrains*
+
+# ============================================================
+# IDE 与自动生成的工程文件
+# ============================================================
+.vs/
+.idea/
+.gradle/
+.consulo/
+ExportedObj/
+*.csproj
+*.unityproj
+*.sln
+*.slnx
+*.suo
+*.tmp
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+*.pidb.meta
+*.pdb.meta
+*.mdb.meta
+
+# ============================================================
+# 构建产物
+# ============================================================
+*.apk
+*.aab
+*.unitypackage
+*.app
+crashlytics-build.properties
+
+# ============================================================
+# Addressables 生成的二进制与缓存
+# ============================================================
+/[Aa]ssets/[Aa]ddressable[Aa]ssets[Dd]ata/*/*.bin*
+/[Aa]ssets/[Ss]treamingAssets/aa.meta
+/[Aa]ssets/[Ss]treamingAssets/aa/*
+
+# ============================================================
+# 操作系统垃圾文件
+# ============================================================
+.DS_Store
+Thumbs.db
+desktop.ini

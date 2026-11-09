@@ -1,0 +1,89 @@
+# ============================================================
+# Unity 6 / Decoherence — 换行、合并驱动、二进制标记、Git LFS
+# ============================================================
+
+# 文本文件在仓库内统一归一化为 LF。
+# 不额外强制 eol=lf：Unity 新建脚本默认写 CRLF，留出容错空间，
+# 避免每次新建脚本都出现纯换行差异。
+* text=auto
+
+# ---------- C# / 着色器 / 配置：普通文本合并 ----------
+*.cs           text diff=csharp
+*.shader       text
+*.compute      text
+*.hlsl         text
+*.cginc        text
+*.glslinc      text
+*.asmdef       text
+*.asmref       text
+*.json         text
+*.xml          text
+*.md           text
+*.txt          text
+*.yml          text
+*.yaml         text
+*.inputactions text
+
+# ---------- Unity YAML 序列化资源：走 SmartMerge ----------
+*.unity              text merge=unityyamlmerge
+*.prefab             text merge=unityyamlmerge
+*.asset              text merge=unityyamlmerge
+*.mat                text merge=unityyamlmerge
+*.anim               text merge=unityyamlmerge
+*.controller         text merge=unityyamlmerge
+*.overrideController text merge=unityyamlmerge
+*.mask               text merge=unityyamlmerge
+*.physicMaterial     text merge=unityyamlmerge
+*.physicsMaterial2D  text merge=unityyamlmerge
+*.preset             text merge=unityyamlmerge
+*.renderTexture      text merge=unityyamlmerge
+*.meta               text merge=unityyamlmerge
+
+# ============================================================
+# Git LFS：大二进制素材。命中靠「路径规则」，与文件大小无关。
+# 仓库里只存指针，真实内容由 LFS 存储保管。
+# 例外可以就地覆盖，例如把 UI 小图标退回普通 git：
+#   Assets/UI/Icons/**/*.png -filter -diff -merge text
+# ============================================================
+
+# 图片 / 贴图
+*.png        filter=lfs diff=lfs merge=lfs -text
+*.jpg        filter=lfs diff=lfs merge=lfs -text
+*.jpeg       filter=lfs diff=lfs merge=lfs -text
+*.tga        filter=lfs diff=lfs merge=lfs -text
+*.tif        filter=lfs diff=lfs merge=lfs -text
+*.tiff       filter=lfs diff=lfs merge=lfs -text
+*.psd        filter=lfs diff=lfs merge=lfs -text
+*.exr        filter=lfs diff=lfs merge=lfs -text
+*.hdr        filter=lfs diff=lfs merge=lfs -text
+*.bmp        filter=lfs diff=lfs merge=lfs -text
+*.gif        filter=lfs diff=lfs merge=lfs -text
+
+# 模型
+*.fbx        filter=lfs diff=lfs merge=lfs -text
+*.obj        filter=lfs diff=lfs merge=lfs -text
+*.blend      filter=lfs diff=lfs merge=lfs -text
+
+# 音频
+*.wav        filter=lfs diff=lfs merge=lfs -text
+*.mp3        filter=lfs diff=lfs merge=lfs -text
+*.ogg        filter=lfs diff=lfs merge=lfs -text
+*.aiff       filter=lfs diff=lfs merge=lfs -text
+
+# 视频
+*.mp4        filter=lfs diff=lfs merge=lfs -text
+*.mov        filter=lfs diff=lfs merge=lfs -text
+*.webm       filter=lfs diff=lfs merge=lfs -text
+
+# 导入包
+*.unitypackage filter=lfs diff=lfs merge=lfs -text
+
+# ---------- 其余二进制：走普通 git，不做文本转换与逐行 diff ----------
+*.dll    binary
+*.so     binary
+*.dylib  binary
+*.bundle binary
+*.ttf    binary
+*.otf    binary
+*.zip    binary
+*.7z     binary

@@ -24,20 +24,25 @@
 *.yaml         text
 *.inputactions text
 
-# ---------- Unity YAML 序列化资源：走 SmartMerge ----------
-*.unity              text merge=unityyamlmerge
-*.prefab             text merge=unityyamlmerge
-*.asset              text merge=unityyamlmerge
-*.mat                text merge=unityyamlmerge
-*.anim               text merge=unityyamlmerge
-*.controller         text merge=unityyamlmerge
-*.overrideController text merge=unityyamlmerge
-*.mask               text merge=unityyamlmerge
-*.physicMaterial     text merge=unityyamlmerge
-*.physicsMaterial2D  text merge=unityyamlmerge
-*.preset             text merge=unityyamlmerge
-*.renderTexture      text merge=unityyamlmerge
-*.meta               text merge=unityyamlmerge
+# ---------- Unity YAML 序列化资源：只做换行归一化 ----------
+# 这里不要再写 merge=unityyamlmerge。
+# Unity 官方只支持 `git mergetool`（配置在全局 .gitconfig 的
+# merge.tool / mergetool.unityyamlmerge 里）；属性里声明了合并驱动
+# 而配置中没有对应驱动时，git 会静默退回文本合并，看起来像启用了
+# SmartMerge 实际却没有。
+*.unity              text
+*.prefab             text
+*.asset              text
+*.mat                text
+*.anim               text
+*.controller         text
+*.overrideController text
+*.mask               text
+*.physicMaterial     text
+*.physicsMaterial2D  text
+*.preset             text
+*.renderTexture      text
+*.meta               text
 
 # ============================================================
 # Git LFS：大二进制素材。命中靠「路径规则」，与文件大小无关。

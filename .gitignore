@@ -20,6 +20,11 @@
 # Unity 崩溃日志
 sysinfo.txt
 
+# Unity 6 按需生成的编辑器设置，模板并未携带，当前全部是出厂默认值。
+# 一旦在 Project Settings > Scene Template 里做了自定义（Default Types /
+# New Scene 行为），就删掉下面这行并提交该文件，否则自定义不会被共享。
+/ProjectSettings/SceneTemplateSettings.json
+
 # 注意：.meta 必须提交。只有当某个资源本身被忽略时，才忽略它的 .meta；
 # 下面这行保证已跟踪资源的 .meta 不被任何忽略规则误伤。
 !/[Aa]ssets/**/*.meta

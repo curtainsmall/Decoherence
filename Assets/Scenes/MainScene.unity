@@ -8330,6 +8330,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Decoherence.DebugOverlay
   target: {fileID: 0}
+  pool: {fileID: 0}
   margin: {x: 10, y: 10}
 --- !u!1 &1872562470
 GameObject:
@@ -8994,6 +8995,7 @@ GameObject:
   - component: {fileID: 2018958194}
   - component: {fileID: 2018958195}
   - component: {fileID: 2018958196}
+  - component: {fileID: 2018958197}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -9066,6 +9068,23 @@ MonoBehaviour:
   pitchSin: 0.7071068
   stickToGroundSpeed: 1
   gravity: 9.81
+--- !u!114 &2018958197
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2018958193}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 88bcb9237bcd56747b7f2e9704c91a43, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Decoherence.PlayerCoherence
+  motor: {fileID: 0}
+  maxCoherence: 100
+  drainPerSecond: 12.5
+  regenPerSecond: 20
+  readMouseInput: 1
 --- !u!1 &2095044211
 GameObject:
   m_ObjectHideFlags: 0

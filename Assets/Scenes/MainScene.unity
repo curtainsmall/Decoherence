@@ -1137,7 +1137,7 @@ MonoBehaviour:
   radialOffset: 0.12
   sweepDegrees: 40
   arrowHead: 1
-  autoFromCharacterController: 1
+  autoFromCharacterController: 0
   radius: 0.35
   thickness: 0.09
   segments: 48
@@ -2982,6 +2982,72 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 682834595}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &692868161
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 692868162}
+  - component: {fileID: 692868163}
+  m_Layer: 0
+  m_Name: Cloud
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &692868162
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 692868161}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2018958194}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &692868163
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 692868161}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3dc081f14b9c81f4aa39d525201e2019, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Decoherence.CloudBody
+  motor: {fileID: 0}
+  coherence: {fileID: 0}
+  blockyBody: {fileID: 257572354}
+  blobCount: 5
+  coherentContactRadius: 0.35
+  lowCoherenceContactRadius: 0.55
+  coreRadius: 0.15
+  bodyRadius: 0.35
+  blobSpacingFactor: 0.45
+  volumeCap: 1.6
+  shapeSmoothing: 0.08
+  cloudHeight: 0.8
+  cloudMaterial: {fileID: 2100000, guid: bdbdd5542c3a1e54cb9d47653764390a, type: 2}
+  coreMaterial: {fileID: 2100000, guid: c9176211eeef0904c8454fc45df0416f, type: 2}
+  rotationDegreesPerSecond: 20
+  transitionDuration: 0.15
+  cloudColor: {r: 0.75, g: 0.88, b: 1, a: 1}
+  baseAlpha: 0.5
+  edgeSoftnessRange: {x: 0.12, y: 0.42}
+  barrierMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
 --- !u!1 &756865790
 GameObject:
   m_ObjectHideFlags: 0
@@ -4204,7 +4270,7 @@ MonoBehaviour:
   radialOffset: 0.1
   sweepDegrees: 360
   arrowHead: 0
-  autoFromCharacterController: 1
+  autoFromCharacterController: 0
   radius: 0.35
   thickness: 0.1
   segments: 48
@@ -9854,6 +9920,7 @@ Transform:
   m_Children:
   - {fileID: 301106474}
   - {fileID: 257572354}
+  - {fileID: 692868162}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!143 &2018958195

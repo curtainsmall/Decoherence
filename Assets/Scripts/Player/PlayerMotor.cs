@@ -23,9 +23,6 @@ namespace Decoherence
         [SerializeField, Min(0f)] private float decoherentSpeed = 7f;
 
         [Header("Response")]
-        [SerializeField, Min(0f)] private float acceleration = 50f;
-        [SerializeField, Min(0f)] private float deceleration = 80f;
-
         [Tooltip("方向滤波的时间常数 τ（秒）。0.05 表示约 0.05 s 收敛 63%、约 0.15 s 收敛 95%；越小越锐利，越大越顺滑")]
         [FormerlySerializedAs("directionSmoothing")]
         [SerializeField, Min(0.001f)] private float directionSmoothingTimeConstant = 0.05f;
@@ -88,8 +85,7 @@ namespace Decoherence
             }
 
             Vector3 targetVelocity = smoothedDirection * (throttle * MaxSpeed);
-            float rate = targetVelocity.sqrMagnitude > planarVelocity.sqrMagnitude ? acceleration : deceleration;
-            planarVelocity = Vector3.MoveTowards(planarVelocity, targetVelocity, rate * dt);
+            planarVelocity = targetVelocity;
 
             verticalVelocity = controller.isGrounded
                 ? -stickToGroundSpeed

@@ -19,8 +19,8 @@ namespace Decoherence
     {
         [Header("State")]
         [SerializeField] private CoherenceState state = CoherenceState.Coherent;
-        [SerializeField, Min(0f)] private float coherentSpeed = 3.5f;
-        [SerializeField, Min(0f)] private float decoherentSpeed = 5f;
+        [SerializeField, Min(0f)] private float coherentSpeed = 5f;
+        [SerializeField, Min(0f)] private float decoherentSpeed = 7f;
 
         [Header("Response")]
         [SerializeField, Min(0f)] private float acceleration = 50f;

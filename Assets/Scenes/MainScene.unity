@@ -3029,25 +3029,32 @@ MonoBehaviour:
   motor: {fileID: 0}
   coherence: {fileID: 0}
   blockyBody: {fileID: 257572354}
-  blobCount: 5
-  coherentContactRadius: 0.35
-  lowCoherenceContactRadius: 0.55
-  coreRadius: 0.15
-  bodyRadius: 0.35
-  blobSpacingFactor: 0.45
-  volumeCap: 1.6
-  shapeSmoothing: 0.08
-  cloudHeight: 0.8
-  cloudMaterial: {fileID: 2100000, guid: bdbdd5542c3a1e54cb9d47653764390a, type: 2}
-  coreMaterial: {fileID: 2100000, guid: c9176211eeef0904c8454fc45df0416f, type: 2}
-  rotationDegreesPerSecond: 20
-  transitionDuration: 0.15
-  cloudColor: {r: 0.75, g: 0.88, b: 1, a: 1}
-  baseAlpha: 0.5
-  edgeSoftnessRange: {x: 0.12, y: 0.42}
+  pillarCount: 8
+  pillarLength: 0.4
+  lowCoherencePillarLength: 0.6
+  angularStiffness: 55
+  angularDamping: 7
+  accelerationGain: 2.6
+  maxLagDegrees: 78
+  rayHeight: 0.5
+  wallClearance: 0.03
   barrierMask:
     serializedVersion: 2
     m_Bits: 4294967295
+  boundarySamples: 64
+  shadowMaterial: {fileID: 2100000, guid: c938e7fc1ce36e34c897bfe6a4368d1a, type: 2}
+  baseMargin: 0.1
+  trailMargin: 0.22
+  speedMargin: 0.02
+  shadowColor: {r: 0.04, g: 0.05, b: 0.09, a: 1}
+  shadowAlpha: 0.72
+  transitionDuration: 0.15
+  baseHeight: 0.2
+  cloudHeight: 0.85
+  ringCount: 6
+  noiseAmplitude: 0.05
+  noiseSpeed: 0.4
+  noiseScale: 2.1
 --- !u!1 &756865790
 GameObject:
   m_ObjectHideFlags: 0
@@ -9983,7 +9990,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Decoherence.PlayerCoherence
   motor: {fileID: 0}
   maxCoherence: 100
-  drainPerSecond: 12.5
+  drainPerSecond: 0
   regenPerSecond: 20
   readMouseInput: 1
 --- !u!1 &2037511364

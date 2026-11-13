@@ -5,11 +5,8 @@ Shader "Decoherence/ShadowCloud"
         _Color ("Color", Color) = (0.010, 0.012, 0.018, 1)
         _Alpha ("Alpha", Range(0, 1)) = 1.0
         _NoiseScale ("Noise Scale", Float) = 8
-        _NoiseStrength ("Noise Strength", Range(0, 1)) = 0.45
-        _EdgeFeather ("Top Fade", Range(0.05, 1)) = 0.55
-        _FalloffPower ("Radial Falloff Power", Range(0.5, 6)) = 1.5
-        _EdgeAlpha ("Edge Alpha", Range(0, 1)) = 0.45
-        _CoreShift ("Core Darken", Range(0, 1)) = 0.45
+        _NoiseStrength ("Noise Strength", Range(0, 1)) = 0.5
+        _FalloffPower ("Puff Falloff Power", Range(0.3, 4)) = 1.5
         _RiseSpeed ("Rise Speed", Float) = 0.55
     }
 
@@ -42,12 +39,14 @@ Shader "Decoherence/ShadowCloud"
             {
                 float4 positionOS : POSITION;
                 float4 color : COLOR;
+                float2 uv : TEXCOORD0;
             };
 
             struct Varyings
             {
                 float4 positionCS : SV_POSITION;
                 float4 color : COLOR;
+                float2 uv : TEXCOORD0;
                 float3 positionWS : TEXCOORD1;
             };
 
@@ -56,10 +55,7 @@ Shader "Decoherence/ShadowCloud"
                 float _Alpha;
                 float _NoiseScale;
                 float _NoiseStrength;
-                float _EdgeFeather;
                 float _FalloffPower;
-                float _EdgeAlpha;
-                float _CoreShift;
                 float _RiseSpeed;
             CBUFFER_END
 
@@ -107,21 +103,17 @@ Shader "Decoherence/ShadowCloud"
                 output.positionCS = TransformObjectToHClip(input.positionOS.xyz);
                 output.positionWS = TransformObjectToWorld(input.positionOS.xyz);
                 output.color = input.color;
+                output.uv = input.uv;
                 return output;
             }
 
             half4 frag(Varyings input) : SV_Target
             {
-                // color.r = 高度比例（0 底 / 1 顶），color.g = 径向比例（0 核心 / 1 边界）
-                float height = saturate(input.color.r);
-                float radial = saturate(input.color.g);
-                float density = input.color.a;
+                // 每个 puff 是一张面向相机的四边形，UV 决定柔边
+                float radius = saturate(length(input.uv - 0.5) * 2.0);
+                float soft = pow(saturate(1.0 - radius), _FalloffPower);
 
-                // 非线性径向过渡：核心实、边缘快速变淡
-                float core = pow(saturate(1.0 - radial), _FalloffPower);
-                float radialMask = lerp(_EdgeAlpha, 1.0, core);
-
-                // 噪声域整体向上漂移，观感像升腾的烟
+                // 噪声域向上漂移，边缘被侵蚀成丝缕
                 float2 domain = input.positionWS.xz * _NoiseScale
                     + float2(_Time.y * 0.08, -_Time.y * _RiseSpeed);
                 float drift = input.positionWS.y * _NoiseScale * 0.6 - _Time.y * _RiseSpeed;
@@ -129,21 +121,16 @@ Shader "Decoherence/ShadowCloud"
                 float n1 = fbm(domain + drift);
                 float n2 = fbm(domain * 2.6 - drift * 1.2 + 19.0);
 
-                // 边缘靠噪声打出破洞，核心几乎不受影响
-                float grain = lerp(1.0, saturate(n1 * 1.15 + n2 * 0.5), _NoiseStrength * (1.0 - core * 0.8));
+                float grain = lerp(1.0, saturate(n1 * 1.25 + n2 * 0.55), _NoiseStrength);
 
-                float alpha = saturate(density * _Alpha * radialMask * (1.0 + core * 0.8) * grain);
-
-                // 顶部收口再淡一点，避免露出硬边
-                alpha *= smoothstep(1.0, lerp(0.88, 0.97, _EdgeFeather), height);
+                float alpha = saturate(input.color.a * _Alpha * soft * grain);
 
                 if (alpha <= 0.004)
                 {
                     discard;
                 }
 
-                // 核心更暗：alpha 更高、颜色更沉
-                float3 color = _Color.rgb * (1.0 - core * _CoreShift) * (0.85 + n1 * 0.5);
+                float3 color = _Color.rgb * (0.8 + n1 * 0.55);
                 return half4(color, alpha);
             }
             ENDHLSL

@@ -37,34 +37,41 @@ namespace Decoherence
 
         [Header("Shadow")]
         [SerializeField] private Material shadowMaterial;
-        [SerializeField, Min(0f)] private float baseMargin = 0.22f;
-        [Tooltip("-velocity 方向的最大额外外扩")]
-        [SerializeField, Min(0f)] private float trailMargin = 0.26f;
-        [Tooltip("每 1 m/s 的额外外扩")]
-        [SerializeField, Min(0f)] private float speedMargin = 0.03f;
         [SerializeField] private Color shadowColor = new Color(0.010f, 0.012f, 0.018f, 1f);
         [SerializeField, Range(0f, 1f)] private float shadowAlpha = 1f;
         [SerializeField, Min(0.01f)] private float transitionDuration = 0.15f;
+
+        [Header("Puffs")]
+        [Tooltip("同时存在的烟团数量；整团云只用一个 mesh")]
+        [SerializeField, Range(8, 200)] private int puffCount = 56;
+        [Tooltip("单个烟团半径（米）")]
+        [SerializeField, Min(0.02f)] private float puffRadius = 0.22f;
+        [SerializeField, Min(0.1f)] private float puffLifetime = 1.8f;
+        [Tooltip("生命周期内向上飘升的高度（米）")]
+        [SerializeField, Min(0f)] private float puffRise = 0.65f;
+        [Tooltip("水平漂移幅度（米）")]
+        [SerializeField, Min(0f)] private float puffWander = 0.07f;
+        [Tooltip("生长期尺寸增益")]
+        [SerializeField, Range(0f, 1f)] private float puffGrow = 0.45f;
+        [SerializeField, Range(0f, 1f)] private float puffAlpha = 0.55f;
+        [Tooltip("贴近判定边界时的淡出带宽度（米）")]
+        [SerializeField, Min(0.01f)] private float edgeFadeWidth = 0.14f;
+        [Tooltip("0 表示内外一致，1 表示中心比边缘浓得多")]
+        [SerializeField, Range(0f, 1f)] private float centerBias = 0.55f;
+
+        [Header("Camera")]
+        [Tooltip("billboard 朝向用的相机；留空时取 Camera.main")]
+        [SerializeField] private Camera viewCamera;
 
         [Header("Volume (3D)")]
         [Tooltip("云底面离地高度（米）；整团云都在这个高度之上")]
         [SerializeField, Min(0f)] private float baseHeight = 0.20f;
         [Tooltip("云的竖向高度（米）；判定仍是 2D，这个高度只影响观感")]
         [SerializeField, Min(0.1f)] private float cloudHeight = 1.15f;
-        [SerializeField, Range(2, 12)] private int ringCount = 7;
-        [Tooltip("起伏振幅（米）")]
-        [SerializeField, Min(0f)] private float noiseAmplitude = 0.10f;
+        [Tooltip("起伏的速度")]
         [SerializeField, Min(0f)] private float noiseSpeed = 0.5f;
         [Tooltip("起伏的空间频率")]
         [SerializeField, Min(0.1f)] private float noiseScale = 2.6f;
-
-        [Header("Layers")]
-        [Tooltip("内核半径占外轮廓的比例")]
-        [SerializeField, Range(0.2f, 1f)] private float coreRadiusScale = 0.72f;
-        [SerializeField, Range(0f, 1f)] private float coreAlpha = 1f;
-        [SerializeField, Range(0f, 1f)] private float outerAlpha = 0.55f;
-
-        private const int ShellCount = 2;
 
         private Transform shadowTransform;
         private Mesh shadowMesh;
@@ -73,8 +80,13 @@ namespace Decoherence
         private Material shadowInstance;
         private Vector3[] shadowVertices;
         private Color[] shadowColors;
+        private Vector2[] shadowUvs;
         private int[] shadowTriangles;
-        private Vector2[] expanded;
+        private float[] puffDepth;
+        private int[] puffOrder;
+        private Vector3[] pendingPosition;
+        private float[] pendingSize;
+        private float[] pendingValue;
 
         private float[] lag;
         private float[] lagVelocity;
@@ -126,6 +138,17 @@ namespace Decoherence
             lagVelocity = new float[pillarCount];
             tips = new Vector2[pillarCount];
             boundary = new Vector2[Mathf.Max(16, boundarySamples)];
+
+            puffOrder = new int[Mathf.Max(1, puffCount)];
+            puffDepth = new float[puffOrder.Length];
+            pendingPosition = new Vector3[puffOrder.Length];
+            pendingSize = new float[puffOrder.Length];
+            pendingValue = new float[puffOrder.Length];
+
+            if (viewCamera == null)
+            {
+                viewCamera = Camera.main;
+            }
 
             CreateShadowObject();
         }
@@ -335,16 +358,19 @@ namespace Decoherence
             return Mathf.Abs(sum) * 0.5f;
         }
 
-        /// <summary>两层体积：内核算实心，外层稀疏、边缘破碎成烟。</summary>
+        /// <summary>
+        /// 判定区即生成域：烟团只在柱尖多边形内生成，靠近边界的一圈按到边距离淡出。
+        /// 这样看到的“云”和判定区是同一份数据，粒子不参与命中计算。
+        /// </summary>
         private void BuildCloudMesh()
         {
-            if (shadowMesh == null || boundary == null)
+            if (shadowMesh == null || boundary == null || puffOrder == null)
             {
                 return;
             }
 
             int count = boundary.Length;
-            int rings = Mathf.Clamp(ringCount, 2, 12);
+            int active = Mathf.Clamp(puffCount, 0, puffOrder.Length);
 
             centroid = Vector2.zero;
             for (int i = 0; i < count; i++)
@@ -354,181 +380,190 @@ namespace Decoherence
 
             centroid /= count;
 
-            Vector2 velocity = GetPlanarVelocity();
-            float speed = velocity.magnitude;
-            Vector2 trailing = speed > 0.01f ? -velocity / speed : Vector2.zero;
-            float margin = baseMargin + speedMargin * speed;
-
-            // 顶点写成“相对核心”的局部坐标：ShadowMesh 是 Cloud 的子物体，跟着玩家一起走
-            Vector2 origin = GetCorePosition();
-
-            if (expanded == null || expanded.Length != count)
-            {
-                expanded = new Vector2[count];
-            }
-
             float boundaryRadius = 0.1f;
-
             for (int i = 0; i < count; i++)
             {
-                Vector2 outward = boundary[i] - centroid;
-                float distance = outward.magnitude;
-                Vector2 direction = distance > 1e-4f ? outward / distance : Vector2.up;
-                float alignment = trailing.sqrMagnitude > 0f ? Mathf.Clamp01(Vector2.Dot(direction, trailing)) : 0f;
-                float extra = trailMargin * Mathf.Pow(alignment, 1.5f);
-
-                expanded[i] = boundary[i] + direction * (margin + extra);
-                boundaryRadius = Mathf.Max(boundaryRadius, Vector2.Distance(expanded[i], centroid));
+                boundaryRadius = Mathf.Max(boundaryRadius, Vector2.Distance(boundary[i], centroid));
             }
 
-            int perShellVertices = rings * count + 2; // 顶盖 + 底盖
-            int perShellTriangles = (rings - 1) * count * 2 + count * 2;
-            int vertexCount = perShellVertices * ShellCount;
-            int triangleCount = perShellTriangles * ShellCount;
+            int vertexCount = active * 4;
+            int triangleCount = active * 2;
 
             if (shadowVertices == null || shadowVertices.Length != vertexCount)
             {
                 shadowVertices = new Vector3[vertexCount];
                 shadowColors = new Color[vertexCount];
+                shadowUvs = new Vector2[vertexCount];
                 shadowTriangles = new int[triangleCount * 3];
-                BuildCloudTriangles(count, rings, perShellVertices);
+
+                for (int i = 0; i < active; i++)
+                {
+                    int v = i * 4;
+                    int t = i * 6;
+
+                    shadowUvs[v] = new Vector2(0f, 0f);
+                    shadowUvs[v + 1] = new Vector2(1f, 0f);
+                    shadowUvs[v + 2] = new Vector2(1f, 1f);
+                    shadowUvs[v + 3] = new Vector2(0f, 1f);
+
+                    shadowTriangles[t] = v;
+                    shadowTriangles[t + 1] = v + 1;
+                    shadowTriangles[t + 2] = v + 2;
+
+                    shadowTriangles[t + 3] = v;
+                    shadowTriangles[t + 4] = v + 2;
+                    shadowTriangles[t + 5] = v + 3;
+                }
             }
 
-            float time = Time.time;
-            float bottom = baseHeight;
-            float top = baseHeight + cloudHeight;
+            // 相对核心的局部坐标：ShadowMesh 是 Cloud 的子物体，跟着玩家一起走
+            Vector2 origin = GetCorePosition();
 
-            // 内核：小、密、暗
-            AppendShell(count, rings, 0, boundaryRadius, origin, coreRadiusScale,
-                Mathf.Lerp(bottom, top, 0.10f), Mathf.Lerp(bottom, top, 0.86f),
-                coreAlpha, 0.75f, time);
+            Vector3 right = Vector3.right;
+            Vector3 up = Vector3.forward;
+            Vector3 viewPosition = origin;
+            Vector3 viewForward = Vector3.down;
 
-            // 外层：大、稀、轮廓被噪声打碎
-            AppendShell(count, rings, perShellVertices, boundaryRadius, origin, 1f,
-                bottom, top, outerAlpha, 1.45f, time);
+            if (viewCamera != null)
+            {
+                Transform cam = viewCamera.transform;
+                right = cam.right;
+                up = cam.up;
+                viewPosition = cam.transform.position;
+                viewForward = cam.forward;
+            }
+
+            float lifetime = Mathf.Max(0.1f, puffLifetime);
+            float cycleTime = Time.time / lifetime;
+
+            for (int i = 0; i < active; i++)
+            {
+                // 每个烟团一组固定相位/种子，帧率不影响分布
+                float seedPhase = Hash(i, 1);
+                float cycle = Mathf.Floor(cycleTime + seedPhase);
+                float phase = cycleTime + seedPhase - cycle;
+
+                int salt = (int)cycle * 131 + i * 17;
+                int sector = Mathf.Clamp((int)(Hash(salt, 2) * count), 0, count - 1);
+
+                float a1 = Hash(salt, 3);
+                float a2 = Hash(salt, 4);
+
+                if (a1 + a2 > 1f)
+                {
+                    a1 = 1f - a1;
+                    a2 = 1f - a2;
+                }
+
+                Vector2 edgeB = boundary[sector];
+                Vector2 edgeC = boundary[(sector + 1) % count];
+
+                Vector2 point = centroid + (edgeB - centroid) * a1 + (edgeC - centroid) * a2;
+                float edgeDistance = DistanceToSegment(point, edgeB, edgeC);
+
+                // 让整个烟团落在多边形内：最多向内收一个半径
+                float inset = Mathf.Min(edgeDistance, puffRadius * 0.8f);
+                Vector2 inward = centroid - point;
+
+                if (inward.sqrMagnitude > 1e-6f)
+                {
+                    point += inward.normalized * inset;
+                }
+
+                edgeDistance += inset;
+
+                float wanderAngle = Hash(i, 6) * Mathf.PI * 2f;
+                float wander = puffWander * (phase - 0.5f) * 2f;
+                point.x += Mathf.Cos(wanderAngle) * wander;
+                point.y += Mathf.Sin(wanderAngle) * wander;
+
+                float lifeFade = Smooth01(0f, 0.22f, phase) * (1f - Smooth01(0.6f, 1f, phase));
+                float edgeFade = Mathf.Clamp01(edgeDistance / Mathf.Max(edgeFadeWidth, 0.01f));
+
+                float radial = Mathf.Clamp01(Vector2.Distance(point, centroid) / boundaryRadius);
+                float center = Mathf.Lerp(1f, 1f - centerBias, radial);
+
+                float alpha = puffAlpha * lifeFade * Mathf.Lerp(0.4f, 1f, edgeFade) * center;
+
+                float rise = Mathf.Min(puffRise * phase, cloudHeight);
+
+                pendingPosition[i] = new Vector3(
+                    point.x,
+                    baseHeight + rise + (Hash(i, 7) - 0.5f) * 0.15f * cloudHeight,
+                    point.y);
+
+                pendingSize[i] = puffRadius * (0.85f + puffGrow * phase);
+                pendingValue[i] = Mathf.Clamp01(alpha);
+                puffDepth[i] = Vector3.Dot(pendingPosition[i] - viewPosition, viewForward);
+                puffOrder[i] = i;
+            }
+
+            // 远的先画：单个 mesh 内不会自动排序，按相机深度从后往前填槽位
+            for (int i = 1; i < active; i++)
+            {
+                int value = puffOrder[i];
+                float key = puffDepth[value];
+                int j = i - 1;
+
+                while (j >= 0 && puffDepth[puffOrder[j]] < key)
+                {
+                    puffOrder[j + 1] = puffOrder[j];
+                    j--;
+                }
+
+                puffOrder[j + 1] = value;
+            }
+
+            for (int slot = 0; slot < active; slot++)
+            {
+                int i = puffOrder[slot];
+
+                Vector3 center3 = pendingPosition[i];
+                float size = pendingSize[i];
+                Vector3 corner = center3 - new Vector3(origin.x, 0f, origin.y);
+
+                int v = slot * 4;
+                shadowVertices[v] = corner - right * size - up * size;
+                shadowVertices[v + 1] = corner + right * size - up * size;
+                shadowVertices[v + 2] = corner + right * size + up * size;
+                shadowVertices[v + 3] = corner - right * size + up * size;
+
+                Color color = new Color(1f, 1f, 1f, pendingValue[i]);
+                shadowColors[v] = color;
+                shadowColors[v + 1] = color;
+                shadowColors[v + 2] = color;
+                shadowColors[v + 3] = color;
+            }
 
             shadowMesh.Clear();
             shadowMesh.vertices = shadowVertices;
             shadowMesh.colors = shadowColors;
+            shadowMesh.uv = shadowUvs;
             shadowMesh.triangles = shadowTriangles;
             shadowMesh.RecalculateBounds();
         }
 
-        private void AppendShell(
-            int count,
-            int rings,
-            int vertexOffset,
-            float boundaryRadius,
-            Vector2 origin,
-            float radiusScale,
-            float heightStart,
-            float heightEnd,
-            float alphaScale,
-            float noiseGain,
-            float time)
+        /// <summary>把 value 映射到 edge0..edge1 后再平滑到 0..1（Mathf.SmoothStep 本身是按值插值，不是归一化）。</summary>
+        private static float Smooth01(float edge0, float edge1, float value)
         {
-            for (int ring = 0; ring < rings; ring++)
+            if (Mathf.Approximately(edge0, edge1))
             {
-                float t = ring / (float)(rings - 1);
-                float height = Mathf.Lerp(heightStart, heightEnd, t);
-
-                // 上半收得比椭球慢，整团更像堆积的烟而不是水滴
-                float profile = Mathf.Pow(Mathf.Cos(t * Mathf.PI * 0.5f), 0.55f);
-
-                float lower = Mathf.Lerp(0.75f, 1f, Mathf.SmoothStep(0f, 0.22f, t));
-                float upper = Mathf.Lerp(1f, 0.45f, Mathf.SmoothStep(0.72f, 1f, t));
-                float alpha = alphaScale * lower * upper;
-
-                for (int i = 0; i < count; i++)
-                {
-                    // 用圆周采样保证接缝处连续；两层噪声给出大小两级团块
-                    float angle = (Mathf.PI * 2f * i) / count;
-                    float n1 = Mathf.PerlinNoise(
-                        Mathf.Cos(angle) * noiseScale + 11.7f,
-                        Mathf.Sin(angle) * noiseScale + t * 1.7f + time * noiseSpeed);
-                    float n2 = Mathf.PerlinNoise(
-                        Mathf.Cos(angle) * noiseScale * 2.3f + 41.2f,
-                        Mathf.Sin(angle) * noiseScale * 2.3f - t * 2.1f - time * noiseSpeed * 1.7f);
-
-                    float lump = (n1 - 0.5f) * 1.35f + (n2 - 0.5f) * 0.65f;
-                    float wobble = lump * 2f * noiseAmplitude * noiseGain;
-
-                    Vector2 point = centroid + (expanded[i] - centroid) * (radiusScale * profile);
-                    Vector2 outward = point - centroid;
-                    float length = outward.magnitude;
-
-                    if (length > 1e-4f)
-                    {
-                        point += outward / length * wobble;
-                    }
-
-                    float radial = Mathf.Clamp01(Vector2.Distance(point, centroid) / boundaryRadius);
-
-                    int index = vertexOffset + ring * count + i;
-                    shadowVertices[index] = new Vector3(
-                        point.x - origin.x,
-                        height + wobble * 0.7f,
-                        point.y - origin.y);
-
-                    // color.r = 高度比例，color.g = 径向比例，color.a = 该点的透明度权重
-                    shadowColors[index] = new Color(t, radial, 1f, Mathf.Clamp01(alpha));
-                }
+                return value < edge0 ? 0f : 1f;
             }
 
-            int ringVertices = vertexOffset + rings * count;
-
-            // 顶部收口
-            shadowVertices[ringVertices] = new Vector3(centroid.x - origin.x, heightEnd, centroid.y - origin.y);
-            shadowColors[ringVertices] = new Color(1f, 0f, 1f, alphaScale * 0.12f);
-
-            // 底部中心：整团云悬空，底面要封住，否则从斜上方会看穿
-            shadowVertices[ringVertices + 1] = new Vector3(centroid.x - origin.x, heightStart, centroid.y - origin.y);
-            shadowColors[ringVertices + 1] = new Color(0f, 0f, 1f, alphaScale * 0.55f);
+            return Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(edge0, edge1, value));
         }
 
-        private void BuildCloudTriangles(int count, int rings, int perShellVertices)
+        /// <summary>确定性哈希：同一下标/场次永远得到同一个 0..1 值。</summary>
+        private static float Hash(int index, int salt)
         {
-            int index = 0;
-
-            for (int shell = 0; shell < ShellCount; shell++)
+            unchecked
             {
-                int start = shell * perShellVertices;
-
-                for (int ring = 0; ring < rings - 1; ring++)
-                {
-                    int current = start + ring * count;
-                    int next = start + (ring + 1) * count;
-
-                    for (int i = 0; i < count; i++)
-                    {
-                        int i1 = (i + 1) % count;
-
-                        shadowTriangles[index++] = current + i;
-                        shadowTriangles[index++] = next + i;
-                        shadowTriangles[index++] = next + i1;
-
-                        shadowTriangles[index++] = current + i;
-                        shadowTriangles[index++] = next + i1;
-                        shadowTriangles[index++] = current + i1;
-                    }
-                }
-
-                int top = start + (rings - 1) * count;
-                int apex = start + rings * count;
-                int bottomCenter = apex + 1;
-
-                for (int i = 0; i < count; i++)
-                {
-                    int i1 = (i + 1) % count;
-
-                    shadowTriangles[index++] = top + i;
-                    shadowTriangles[index++] = apex;
-                    shadowTriangles[index++] = top + i1;
-
-                    shadowTriangles[index++] = start + i;
-                    shadowTriangles[index++] = bottomCenter;
-                    shadowTriangles[index++] = start + i1;
-                }
+                uint h = (uint)(index * 73856093) ^ (uint)(salt * 19349663);
+                h ^= h >> 13;
+                h *= 0x5bd1e995;
+                h ^= h >> 15;
+                return (h & 0xFFFFFF) / 16777215f;
             }
         }
 

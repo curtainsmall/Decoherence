@@ -2,11 +2,15 @@ Shader "Decoherence/ShadowCloud"
 {
     Properties
     {
-        _Color ("Color", Color) = (0.04, 0.05, 0.09, 1)
-        _Alpha ("Alpha", Range(0, 1)) = 0.72
-        _NoiseScale ("Noise Scale", Float) = 9
-        _NoiseStrength ("Noise Strength", Range(0, 1)) = 0.35
-        _EdgeFeather ("Edge Feather", Range(0.05, 1)) = 0.55
+        _Color ("Color", Color) = (0.010, 0.012, 0.018, 1)
+        _Alpha ("Alpha", Range(0, 1)) = 1.0
+        _NoiseScale ("Noise Scale", Float) = 8
+        _NoiseStrength ("Noise Strength", Range(0, 1)) = 0.45
+        _EdgeFeather ("Top Fade", Range(0.05, 1)) = 0.55
+        _FalloffPower ("Radial Falloff Power", Range(0.5, 6)) = 1.5
+        _EdgeAlpha ("Edge Alpha", Range(0, 1)) = 0.45
+        _CoreShift ("Core Darken", Range(0, 1)) = 0.45
+        _RiseSpeed ("Rise Speed", Float) = 0.55
     }
 
     SubShader
@@ -53,6 +57,10 @@ Shader "Decoherence/ShadowCloud"
                 float _NoiseScale;
                 float _NoiseStrength;
                 float _EdgeFeather;
+                float _FalloffPower;
+                float _EdgeAlpha;
+                float _CoreShift;
+                float _RiseSpeed;
             CBUFFER_END
 
             float hash12(float2 p)
@@ -104,29 +112,38 @@ Shader "Decoherence/ShadowCloud"
 
             half4 frag(Varyings input) : SV_Target
             {
+                // color.r = 高度比例（0 底 / 1 顶），color.g = 径向比例（0 核心 / 1 边界）
                 float height = saturate(input.color.r);
-
-                // 同一 (x,z) 在不同高度取到不同图案，云才有体积感
-                float2 domain = input.positionWS.xz * _NoiseScale
-                    + float2(_Time.y * 0.12, -_Time.y * 0.09);
-
-                float lowNoise = fbm(domain + input.positionWS.y * 1.7);
-                float highNoise = fbm(domain * 2.3 - input.positionWS.y * 1.1 + 17.0);
-
+                float radial = saturate(input.color.g);
                 float density = input.color.a;
-                float grain = lerp(1.0, lowNoise * 0.9 + highNoise * 0.35, _NoiseStrength);
-                float alpha = saturate(density * _Alpha * grain);
 
-                // 顶部收口处再淡一点，避免露出硬边
-                float fadeStart = lerp(0.78, 0.9, _EdgeFeather);
-                alpha *= smoothstep(1.05, fadeStart, height);
+                // 非线性径向过渡：核心实、边缘快速变淡
+                float core = pow(saturate(1.0 - radial), _FalloffPower);
+                float radialMask = lerp(_EdgeAlpha, 1.0, core);
+
+                // 噪声域整体向上漂移，观感像升腾的烟
+                float2 domain = input.positionWS.xz * _NoiseScale
+                    + float2(_Time.y * 0.08, -_Time.y * _RiseSpeed);
+                float drift = input.positionWS.y * _NoiseScale * 0.6 - _Time.y * _RiseSpeed;
+
+                float n1 = fbm(domain + drift);
+                float n2 = fbm(domain * 2.6 - drift * 1.2 + 19.0);
+
+                // 边缘靠噪声打出破洞，核心几乎不受影响
+                float grain = lerp(1.0, saturate(n1 * 1.15 + n2 * 0.5), _NoiseStrength * (1.0 - core * 0.8));
+
+                float alpha = saturate(density * _Alpha * radialMask * (1.0 + core * 0.8) * grain);
+
+                // 顶部收口再淡一点，避免露出硬边
+                alpha *= smoothstep(1.0, lerp(0.88, 0.97, _EdgeFeather), height);
 
                 if (alpha <= 0.004)
                 {
                     discard;
                 }
 
-                float3 color = _Color.rgb * (0.75 + lowNoise * 0.55);
+                // 核心更暗：alpha 更高、颜色更沉
+                float3 color = _Color.rgb * (1.0 - core * _CoreShift) * (0.85 + n1 * 0.5);
                 return half4(color, alpha);
             }
             ENDHLSL

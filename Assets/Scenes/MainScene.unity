@@ -3043,18 +3043,21 @@ MonoBehaviour:
     m_Bits: 4294967295
   boundarySamples: 64
   shadowMaterial: {fileID: 2100000, guid: c938e7fc1ce36e34c897bfe6a4368d1a, type: 2}
-  baseMargin: 0.1
-  trailMargin: 0.22
-  speedMargin: 0.02
-  shadowColor: {r: 0.04, g: 0.05, b: 0.09, a: 1}
-  shadowAlpha: 0.72
+  baseMargin: 0.22
+  trailMargin: 0.26
+  speedMargin: 0.03
+  shadowColor: {r: 0.01, g: 0.012, b: 0.018, a: 1}
+  shadowAlpha: 1
   transitionDuration: 0.15
   baseHeight: 0.2
-  cloudHeight: 0.85
-  ringCount: 6
-  noiseAmplitude: 0.05
-  noiseSpeed: 0.4
-  noiseScale: 2.1
+  cloudHeight: 1.15
+  ringCount: 7
+  noiseAmplitude: 0.1
+  noiseSpeed: 0.5
+  noiseScale: 2.6
+  coreRadiusScale: 0.72
+  coreAlpha: 1
+  outerAlpha: 0.55
 --- !u!1 &756865790
 GameObject:
   m_ObjectHideFlags: 0

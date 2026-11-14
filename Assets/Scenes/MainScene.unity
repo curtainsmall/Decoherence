@@ -1299,8 +1299,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 257572354}
-  - component: {fileID: 257572355}
   - component: {fileID: 257572356}
+  - component: {fileID: 257572357}
   m_Layer: 0
   m_Name: Body
   m_TagString: Untagged
@@ -1327,28 +1327,6 @@ Transform:
   - {fileID: 1584260139}
   m_Father: {fileID: 2018958194}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &257572355
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 257572353}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 95db237b2917eea498819eae56f78fa5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Decoherence.BlockyBodyAnimator
-  motor: {fileID: 0}
-  armLeft: {fileID: 0}
-  armRight: {fileID: 0}
-  legLeft: {fileID: 0}
-  legRight: {fileID: 0}
-  strideDegrees: 0
-  stepsPerMeter: 0
-  swingResponse: 12
-  turnDegreesPerSecond: 720
-  bobHeight: 0
 --- !u!114 &257572356
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1382,6 +1360,37 @@ MonoBehaviour:
   bodyMaterial: {fileID: 2100000, guid: 503158775d739254d8bba8aa0e46425a, type: 2}
   headMaterial: {fileID: 2100000, guid: 081c03cb043303a43b3942ee92208167, type: 2}
   armMaterial: {fileID: 2100000, guid: 2eb4231835cc5074a9a746ff582f9b10, type: 2}
+--- !u!114 &257572357
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 257572353}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 41b0b6af2e950b04f8e08b86d55d92cb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Decoherence.CharacterRig
+  shapeRig: {fileID: 257572356}
+  motor: {fileID: 2018958196}
+  headPivot: {fileID: 1753219312}
+  hopLength: 0.7
+  hopHeight: 0
+  maxHopHz: 4
+  hopResponse: 26
+  contactSquash: 0.06
+  impactWindowDegrees: 70
+  squashResponse: 26
+  idleBreath: 0.008
+  breathHz: 0.45
+  leanMaxDegrees: 14
+  turnLeanDegrees: 8
+  leanResponse: 9
+  turnDegreesPerSecond: 720
+  headLagDistance: 0.02
+  headLagResponse: 8
+  headCounterTilt: 0.3
 --- !u!1 &292624628
 GameObject:
   m_ObjectHideFlags: 0

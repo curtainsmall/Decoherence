@@ -51,6 +51,7 @@ namespace Decoherence
         [SerializeField] private Material armMaterial;
 
         private float squash = 1f;
+        private Vector3 headBasePosition = Vector3.zero;
 
         public bool HasArm => hasArm;
         public float BodyHeight => Mathf.Max(bodyRadius * 2f + 0.001f, bodyHeight) * squash;
@@ -59,6 +60,8 @@ namespace Decoherence
         public float Squash => squash;
         public Transform Body => body;
         public Transform HeadPivot => headPivot;
+        /// <summary>头部枢轴的基础本地位置；动画只在其上叠加偏移，不要覆盖。</summary>
+        public Vector3 HeadPivotBasePosition => headBasePosition;
 
         private void Awake()
         {
@@ -137,7 +140,8 @@ namespace Decoherence
                 float overlap = Mathf.Clamp(headOverlap, 0f, Mathf.Max(0.02f, headRadius) * 2f);
                 float pivotY = vertical - overlap + Mathf.Max(0.02f, headRadius);
 
-                headPivot.localPosition = new Vector3(0f, pivotY, 0f);
+                headBasePosition = new Vector3(0f, pivotY, 0f);
+                headPivot.localPosition = headBasePosition;
                 headPivot.localRotation = Quaternion.identity;
                 headPivot.localScale = Vector3.one;
             }

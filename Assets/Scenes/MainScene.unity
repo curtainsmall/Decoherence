@@ -3033,9 +3033,9 @@ MonoBehaviour:
   pillarLength: 0.72
   lowCoherencePillarLength: 1
   angularStiffness: 55
-  angularDamping: 7
-  accelerationGain: 2.6
-  maxLagDegrees: 78
+  angularDamping: 9
+  accelerationGain: 1.5
+  maxLagDegrees: 45
   rayHeight: 0.5
   wallClearance: 0.03
   barrierMask:

@@ -372,6 +372,10 @@ namespace Decoherence
             int count = boundary.Length;
             int active = Mathf.Clamp(puffCount, 0, puffOrder.Length);
 
+            // 采样基点用核心本身而不是多边形质心：柱子被加速度甩开时质心会跟着偏移，
+            // 那样整团云会“离开”角色；以核心为基点，形状可以歪，但云始终围在身上。
+            Vector2 core = GetCorePosition();
+
             centroid = Vector2.zero;
             for (int i = 0; i < count; i++)
             {
@@ -383,7 +387,7 @@ namespace Decoherence
             float boundaryRadius = 0.1f;
             for (int i = 0; i < count; i++)
             {
-                boundaryRadius = Mathf.Max(boundaryRadius, Vector2.Distance(boundary[i], centroid));
+                boundaryRadius = Mathf.Max(boundaryRadius, Vector2.Distance(boundary[i], core));
             }
 
             int vertexCount = active * 4;
@@ -417,7 +421,7 @@ namespace Decoherence
             }
 
             // 相对核心的局部坐标：ShadowMesh 是 Cloud 的子物体，跟着玩家一起走
-            Vector2 origin = GetCorePosition();
+            Vector2 origin = core;
 
             Vector3 right = Vector3.right;
             Vector3 up = Vector3.forward;
@@ -458,12 +462,13 @@ namespace Decoherence
                 Vector2 edgeB = boundary[sector];
                 Vector2 edgeC = boundary[(sector + 1) % count];
 
-                Vector2 point = centroid + (edgeB - centroid) * a1 + (edgeC - centroid) * a2;
+                // 以核心为扇形基点切分多边形：形状被柱子甩歪时，烟仍从角色身上铺开
+                Vector2 point = core + (edgeB - core) * a1 + (edgeC - core) * a2;
                 float edgeDistance = DistanceToSegment(point, edgeB, edgeC);
 
                 // 让烟团压住多边形：只收 0.3 个半径，边缘 puffs 可以越过边界当柔边
                 float inset = Mathf.Min(edgeDistance, puffRadius * 0.3f);
-                Vector2 inward = centroid - point;
+                Vector2 inward = core - point;
 
                 if (inward.sqrMagnitude > 1e-6f)
                 {
@@ -480,7 +485,7 @@ namespace Decoherence
                 float lifeFade = Smooth01(0f, 0.22f, phase) * (1f - Smooth01(0.6f, 1f, phase));
                 float edgeFade = Mathf.Clamp01(edgeDistance / Mathf.Max(edgeFadeWidth, 0.01f));
 
-                float radial = Mathf.Clamp01(Vector2.Distance(point, centroid) / boundaryRadius);
+                float radial = Mathf.Clamp01(Vector2.Distance(point, core) / boundaryRadius);
                 float center = Mathf.Lerp(1f, 1f - centerBias, radial);
 
                 // 每个 puff 有自己的大小/浓度，避免一团均匀的雾

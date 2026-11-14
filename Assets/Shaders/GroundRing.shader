@@ -9,7 +9,7 @@ Shader "Decoherence/GroundRing"
     {
         Tags
         {
-            "Queue" = "Transparent+100"
+            "Queue" = "Transparent+50"
             "RenderType" = "Transparent"
             "IgnoreProjector" = "True"
             "RenderPipeline" = "UniversalPipeline"

@@ -461,8 +461,8 @@ namespace Decoherence
                 Vector2 point = centroid + (edgeB - centroid) * a1 + (edgeC - centroid) * a2;
                 float edgeDistance = DistanceToSegment(point, edgeB, edgeC);
 
-                // 让整个烟团落在多边形内：最多向内收一个半径
-                float inset = Mathf.Min(edgeDistance, puffRadius * 0.8f);
+                // 让烟团压住多边形：只收 0.3 个半径，边缘 puffs 可以越过边界当柔边
+                float inset = Mathf.Min(edgeDistance, puffRadius * 0.3f);
                 Vector2 inward = centroid - point;
 
                 if (inward.sqrMagnitude > 1e-6f)
@@ -483,7 +483,11 @@ namespace Decoherence
                 float radial = Mathf.Clamp01(Vector2.Distance(point, centroid) / boundaryRadius);
                 float center = Mathf.Lerp(1f, 1f - centerBias, radial);
 
-                float alpha = puffAlpha * lifeFade * Mathf.Lerp(0.4f, 1f, edgeFade) * center;
+                // 每个 puff 有自己的大小/浓度，避免一团均匀的雾
+                float sizeScale = 0.7f + Hash(i, 8) * 0.65f;
+                float valueScale = 0.8f + Hash(i, 9) * 0.4f;
+
+                float alpha = puffAlpha * lifeFade * Mathf.Lerp(0.4f, 1f, edgeFade) * center * valueScale;
 
                 float rise = Mathf.Min(puffRise * phase, cloudHeight);
 
@@ -492,7 +496,7 @@ namespace Decoherence
                     baseHeight + rise + (Hash(i, 7) - 0.5f) * 0.15f * cloudHeight,
                     point.y);
 
-                pendingSize[i] = puffRadius * (0.85f + puffGrow * phase);
+                pendingSize[i] = puffRadius * sizeScale * (0.85f + puffGrow * phase);
                 pendingValue[i] = Mathf.Clamp01(alpha);
                 puffDepth[i] = Vector3.Dot(pendingPosition[i] - viewPosition, viewForward);
                 puffOrder[i] = i;

@@ -24,15 +24,15 @@ namespace Decoherence
 
         public int AliveCount => alive.Count;
 
-        /// <summary>按给定 prefab 生成一只；prefab 为空时返回 null。</summary>
-        public GameObject Spawn(GameObject prefab)
+        /// <summary>按给定定义生成一只；定义或其 prefab 为空时返回 null。</summary>
+        public GameObject Spawn(EnemyDefinition definition)
         {
-            if (prefab == null)
+            if (definition == null || definition.Prefab == null)
             {
                 return null;
             }
 
-            GameObject instance = Instantiate(prefab, PickPosition(), Quaternion.identity, transform);
+            GameObject instance = Instantiate(definition.Prefab, PickPosition(), Quaternion.identity, transform);
 
             alive.Add(instance);
             EnemySpawned?.Invoke(instance);

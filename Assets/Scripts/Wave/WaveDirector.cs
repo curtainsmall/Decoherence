@@ -20,17 +20,17 @@ namespace Decoherence
     public sealed class WaveDirector : MonoBehaviour
     {
         [Header("Sources")]
-        [SerializeField]
+        [SerializeField, HideInInspector]
         EnemySpawner spawner;
 
-        [SerializeField]
+        [SerializeField, HideInInspector]
         PlayerCoherence player;
 
-        [Header("Pacing")]
-        [Tooltip("每波持续生成的时长")]
-        [SerializeField, Min(1f)]
-        float spawnDuration = 8f;
+        [Tooltip("波次表：决定每一波出哪些敌人、几只、间隔多久")]
+        [SerializeField]
+        WaveProfile profile;
 
+        [Header("Pacing")]
         [Tooltip("3 选 1 的停留时长")]
         [SerializeField, Min(0f)]
         float rewardDuration = 3f;
@@ -46,6 +46,8 @@ namespace Decoherence
         public event Action<int> WaveCleared;
 
         float timer;
+        float spawnTimer;
+        int spawnedThisWave;
 
         void Awake()
         {
@@ -83,15 +85,10 @@ namespace Decoherence
                 return;
             }
 
-            timer -= Time.deltaTime;
-
             switch (State)
             {
                 case WaveState.Spawning:
-                    if (timer <= 0f)
-                    {
-                        State = WaveState.Clearing;
-                    }
+                    UpdateSpawning();
                     break;
 
                 case WaveState.Clearing:
@@ -102,6 +99,8 @@ namespace Decoherence
                     break;
 
                 case WaveState.Reward:
+                    timer -= Time.deltaTime;
+
                     if (timer <= 0f)
                     {
                         BeginWave(WaveIndex + 1);
@@ -110,11 +109,48 @@ namespace Decoherence
             }
         }
 
+        void UpdateSpawning()
+        {
+            if (spawner == null || profile == null)
+            {
+                State = WaveState.Clearing;
+                return;
+            }
+
+            WaveEntry entry = profile.GetWave(WaveIndex);
+
+            spawnTimer -= Time.deltaTime;
+
+            while (spawnTimer <= 0f && spawnedThisWave < entry.Count)
+            {
+                if (AliveCount >= entry.MaxAlive)
+                {
+                    break;
+                }
+
+                EnemyDefinition definition = entry.PickDefinition();
+
+                if (definition == null || spawner.Spawn(definition) == null)
+                {
+                    break;
+                }
+
+                spawnedThisWave++;
+                spawnTimer += entry.Interval;
+            }
+
+            if (spawnedThisWave >= entry.Count)
+            {
+                State = WaveState.Clearing;
+            }
+        }
+
         void BeginWave(int index)
         {
             WaveIndex = index;
             State = WaveState.Spawning;
-            timer = spawnDuration;
+            spawnedThisWave = 0;
+            spawnTimer = 0f;
             WaveStarted?.Invoke(index);
         }
 
@@ -134,7 +170,7 @@ namespace Decoherence
         {
             if (spawner == null)
             {
-                spawner = GetComponent<EnemySpawner>();
+                spawner = GetComponentInChildren<EnemySpawner>(true);
             }
 
             if (player == null)

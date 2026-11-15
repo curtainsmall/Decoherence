@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 02d1a48bf92685c448532929ffce9539, type: 3}
+  m_Name: DefaultWaves
+  m_EditorClassIdentifier: Assembly-CSharp::Decoherence.WaveProfile
+  waves:
+  - composition:
+    - {fileID: 11400000, guid: bd80d2f6b0c474b43a6becbfc81767e3, type: 2}
+    count: 4
+    interval: 1.2
+    maxAlive: 2
+  - composition:
+    - {fileID: 11400000, guid: bd80d2f6b0c474b43a6becbfc81767e3, type: 2}
+    count: 6
+    interval: 1
+    maxAlive: 3
+  - composition:
+    - {fileID: 11400000, guid: bd80d2f6b0c474b43a6becbfc81767e3, type: 2}
+    count: 8
+    interval: 0.8000001
+    maxAlive: 4

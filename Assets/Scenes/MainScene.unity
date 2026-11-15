@@ -1158,9 +1158,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dead1a9912625d845b21918066a6a282, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Decoherence.WaveDirector
-  spawner: {fileID: 0}
-  player: {fileID: 0}
-  spawnDuration: 8
+  spawner: {fileID: 1355362727}
+  player: {fileID: 2018958197}
+  profile: {fileID: 11400000, guid: 15f743dd98d1227499ac213a472f78c3, type: 2}
   rewardDuration: 3
 --- !u!1 &1750345201
 GameObject:

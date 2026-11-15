@@ -12,6 +12,9 @@ GameObject:
   - component: {fileID: 3189978752753104026}
   - component: {fileID: 5358613353626996543}
   - component: {fileID: 7158671570996338330}
+  - component: {fileID: 4354844728114761393}
+  - component: {fileID: 1046016032993834947}
+  - component: {fileID: 8933895520751480236}
   m_Layer: 0
   m_Name: Enemy
   m_TagString: Untagged
@@ -91,6 +94,56 @@ MonoBehaviour:
   phase: 1
   target: {fileID: 0}
   moveSpeed: 3.2
+--- !u!114 &4354844728114761393
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8390687172403119618}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 702f206b00788a74d8210f6cae5d1187, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Decoherence.EnemyAgent
+  state: {fileID: 0}
+  motor: {fileID: 0}
+  attack: {fileID: 0}
+--- !u!114 &1046016032993834947
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8390687172403119618}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3c00b65e1a764a44ba2329895795fa9b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Decoherence.EnemyVitals
+  maxHealth: 36
+  cloudDamagePerSecond: 30
+  state: {fileID: 0}
+  cloud: {fileID: 0}
+  spawner: {fileID: 0}
+  body: {fileID: 0}
+--- !u!114 &8933895520751480236
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8390687172403119618}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a680ad03ce8879145b139ff904be4305, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Decoherence.EnemyMeleeAttack
+  state: {fileID: 0}
+  player: {fileID: 0}
+  damage: 7
+  cooldown: 0.8
+  range: 0.9
 --- !u!1001 &5996316092154794265
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -361,6 +414,14 @@ PrefabInstance:
       propertyPath: m_LocalPosition.y
       value: 0.625
       objectReference: {fileID: 0}
+    - target: {fileID: 8131513312675965794, guid: 0456d991808b346499fbbdcc166340b7, type: 3}
+      propertyPath: motor
+      value: 
+      objectReference: {fileID: 5358613353626996543}
+    - target: {fileID: 8131513312675965794, guid: 0456d991808b346499fbbdcc166340b7, type: 3}
+      propertyPath: state
+      value: 
+      objectReference: {fileID: 7158671570996338330}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:

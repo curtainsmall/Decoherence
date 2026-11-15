@@ -4,11 +4,11 @@ namespace Decoherence
 {
     /// <summary>
     /// 角色外观的唯一参数入口：把「胶囊身体 + 球头 + 可选手臂」的几何参数应用到节点上。
-    /// 只摆 Transform 与材质，不含任何玩法数值，也不做动画——动画由 CharacterRig 写通道，
+    /// 只摆 Transform 与材质，不含任何玩法数值，也不做动画——动画由 MotionRig 写通道，
     /// 二者不抢同一个 Transform 的写权限（squash 只作用于 body 节点，且走 SetSquash）。
     /// </summary>
     [DisallowMultipleComponent]
-    public sealed class ShapeRig : MonoBehaviour
+    public sealed class BodyRig : MonoBehaviour
     {
         [Header("References")]
         [Tooltip("胶囊身体 mesh；整棵子树里唯一允许被 squash 的节点")]

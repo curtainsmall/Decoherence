@@ -132,6 +132,45 @@ namespace Decoherence
             Debug.Log("coherence depleted — run over.", this);
         }
 
+        /// <summary>扣除相干度（受到伤害）。归零即死亡，且只触发一次。</summary>
+        public void Drain(float amount)
+        {
+            if (IsDead || amount <= 0f)
+            {
+                return;
+            }
+
+            bool wasDecoherent = IsDecoherent;
+
+            Coherence -= amount;
+
+            if (Coherence > 0f)
+            {
+                return;
+            }
+
+            Coherence = 0f;
+            SetState(CoherenceState.Coherent);
+
+            if (wasDecoherent)
+            {
+                StateChanged?.Invoke();
+            }
+
+            Die();
+        }
+
+        /// <summary>回复相干度（获得奖励），不会超过上限。</summary>
+        public void Restore(float amount)
+        {
+            if (IsDead || amount <= 0f)
+            {
+                return;
+            }
+
+            Coherence = Mathf.Min(maxCoherence, Coherence + amount);
+        }
+
     }
 
 }

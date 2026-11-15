@@ -4,16 +4,16 @@ namespace Decoherence
 {
     /// <summary>
     /// 角色的运动观感：竖直弹跳节律、体积压扁、前倾与头部滞后。
-    /// 只写视觉节点（rig 根 / HeadPivot / 通过 ShapeRig 写身体压扁），不碰 CharacterController，
+    /// 只写视觉节点（rig 根 / HeadPivot / 通过 BodyRig 写身体压扁），不碰 CharacterController，
     /// 也不含玩法数值——速度由 PlayerMotor 提供，或在没有 motor 时由 SetMotion 推入。
     /// 同一个 Transform 只有一个写者：本组件独占 rig 根的 rotation，因此不再与旧的转身脚本叠加。
     /// </summary>
     [DisallowMultipleComponent]
-    public sealed class CharacterRig : MonoBehaviour
+    public sealed class MotionRig : MonoBehaviour
     {
         [Header("References")]
         [SerializeField, HideInInspector]
-        ShapeRig shapeRig;
+        BodyRig bodyRig;
 
         [Tooltip("为空时用 SetMotion 推入速度（敌人用）")]
         [SerializeField, HideInInspector]
@@ -117,9 +117,9 @@ namespace Decoherence
             currentYaw = Quaternion.Euler(0f, transform.eulerAngles.y, 0f);
             previousYawAngle = transform.eulerAngles.y;
 
-            if (shapeRig != null)
+            if (bodyRig != null)
             {
-                headBasePosition = shapeRig.HeadPivotBasePosition;
+                headBasePosition = bodyRig.HeadPivotBasePosition;
             }
         }
 
@@ -190,7 +190,7 @@ namespace Decoherence
 
         void UpdateSquash(float dt, float speed)
         {
-            if (shapeRig == null)
+            if (bodyRig == null)
             {
                 return;
             }
@@ -202,7 +202,7 @@ namespace Decoherence
                 breathPhase -= 360f;
             }
 
-            float moving = Mathf.Clamp01(speed / Mathf.Max(0.5f, shapeRig.BodyRadius * 4f));
+            float moving = Mathf.Clamp01(speed / Mathf.Max(0.5f, bodyRig.BodyRadius * 4f));
 
             // |sin| 的波谷就是触地点，每 180° 一次；只在这一小段里压缩，其余时间保持实心。
             // 不弹跳时相位恒为 0，这里必须显式关掉撞击，否则会被当成“一直在触地”。
@@ -221,7 +221,7 @@ namespace Decoherence
             float target = 1f - contactSquash * impact * moving + breath;
 
             squash = Mathf.Lerp(squash, target, 1f - Mathf.Exp(-squashResponse * dt));
-            shapeRig.SetSquash(squash);
+            bodyRig.SetSquash(squash);
         }
 
         void UpdateLean(float dt, Vector3 velocity, float speed, float maxSpeed)
@@ -273,9 +273,9 @@ namespace Decoherence
 
         void ResolveReferences()
         {
-            if (shapeRig == null)
+            if (bodyRig == null)
             {
-                shapeRig = GetComponent<ShapeRig>();
+                bodyRig = GetComponent<BodyRig>();
             }
 
             if (motor == null)
@@ -283,9 +283,9 @@ namespace Decoherence
                 motor = GetComponentInParent<PlayerMotor>();
             }
 
-            if (headPivot == null && shapeRig != null)
+            if (headPivot == null && bodyRig != null)
             {
-                headPivot = shapeRig.HeadPivot;
+                headPivot = bodyRig.HeadPivot;
             }
         }
 

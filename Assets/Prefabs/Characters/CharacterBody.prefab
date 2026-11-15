@@ -358,7 +358,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 41b0b6af2e950b04f8e08b86d55d92cb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Decoherence.CharacterRig
-  shapeRig: {fileID: 6921311936716061150}
+  bodyRig: {fileID: 6921311936716061150}
   motor: {fileID: 0}
   headPivot: {fileID: 2574120990999888028}
   hopLength: 0.7

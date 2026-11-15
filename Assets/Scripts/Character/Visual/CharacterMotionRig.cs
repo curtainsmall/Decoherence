@@ -4,20 +4,22 @@ namespace Decoherence
 {
     /// <summary>
     /// 角色的运动观感：竖直弹跳节律、体积压扁、前倾与头部滞后。
-    /// 只写视觉节点（rig 根 / HeadPivot / 通过 BodyRig 写身体压扁），不碰 CharacterController，
-    /// 也不含玩法数值——速度由 PlayerMotor 提供，或在没有 motor 时由 SetMotion 推入。
+    /// 只写视觉节点（rig 根 / HeadPivot / 通过 CharacterBodyRig 写身体压扁），不碰 CharacterController，
+    /// 也不含玩法数值——速度与速度上限由 CharacterMotor / CharacterState 提供。
     /// 同一个 Transform 只有一个写者：本组件独占 rig 根的 rotation，因此不再与旧的转身脚本叠加。
     /// </summary>
     [DisallowMultipleComponent]
-    public sealed class MotionRig : MonoBehaviour
+    public sealed class CharacterMotionRig : MonoBehaviour
     {
         [Header("References")]
         [SerializeField, HideInInspector]
-        BodyRig bodyRig;
+        CharacterBodyRig bodyRig;
 
-        [Tooltip("为空时用 SetMotion 推入速度（敌人用）")]
         [SerializeField, HideInInspector]
-        PlayerMotor motor;
+        CharacterMotor motor;
+
+        [SerializeField, HideInInspector]
+        CharacterState state;
 
         [SerializeField, HideInInspector]
         Transform headPivot;
@@ -128,11 +130,7 @@ namespace Decoherence
             ResolveReferences();
         }
 
-        /// <summary>没有 PlayerMotor 时由宿主推入平面速度，用于敌人复用同一套观感。</summary>
-        public void SetMotion(Vector3 planarVelocity)
-        {
-            pushedVelocity = new Vector3(planarVelocity.x, 0f, planarVelocity.z);
-        }
+
 
         void Update()
         {
@@ -147,7 +145,7 @@ namespace Decoherence
             velocity.y = 0f;
 
             float speed = velocity.magnitude;
-            float maxSpeed = motor != null ? Mathf.Max(motor.MaxSpeed, 0.01f) : Mathf.Max(1f, speed);
+            float maxSpeed = state != null ? Mathf.Max(state.MaxSpeed, 0.01f) : Mathf.Max(1f, speed);
             Speed = speed;
 
             UpdateHop(dt, speed);
@@ -275,12 +273,17 @@ namespace Decoherence
         {
             if (bodyRig == null)
             {
-                bodyRig = GetComponent<BodyRig>();
+                bodyRig = GetComponent<CharacterBodyRig>();
             }
 
             if (motor == null)
             {
-                motor = GetComponentInParent<PlayerMotor>();
+                motor = GetComponentInParent<CharacterMotor>();
+            }
+
+            if (state == null)
+            {
+                state = GetComponentInParent<CharacterState>();
             }
 
             if (headPivot == null && bodyRig != null)

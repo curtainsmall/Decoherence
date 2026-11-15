@@ -1,39 +1,21 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.Serialization;
 
 namespace Decoherence
 {
-    public enum CoherenceState
-    {
-        Coherent = 0,
-
-        Decoherent = 1
-
-    }
-
     /// <summary>
-    /// 指针牵引式移动：鼠标位置决定方向，光标距玩家的屏幕比例距离决定速度。
-    /// 只做移动（含两态速度），不含状态切换与资源结算。
+    /// 玩家输入源：把鼠标位置折算成平面速度意图写给 CharacterMotor，
+    /// 同时把“按住状态键”的意图写给 PlayerState。自己不移动、不改状态。
     /// </summary>
-    [RequireComponent(typeof(CharacterController))]
-    public sealed class PlayerMotor : MonoBehaviour
+    [DisallowMultipleComponent]
+    public sealed class PlayerSteering : MonoBehaviour
     {
-        [Header("State")]
-        [SerializeField]
-        CoherenceState state = CoherenceState.Coherent;
+        [Header("Wiring")]
+        [SerializeField, HideInInspector]
+        CharacterMotor motor;
 
-        [SerializeField, Min(0f)]
-        float coherentSpeed = 5f;
-
-        [SerializeField, Min(0f)]
-        float decoherentSpeed = 7f;
-
-        [Header("Response")]
-        [Tooltip("方向滤波的时间常数 τ（秒）。0.05 表示约 0.05 s 收敛 63%、约 0.15 s 收敛 95%；越小越锐利，越大越顺滑")]
-        [FormerlySerializedAs("directionSmoothing")]
-        [SerializeField, Min(0.001f)]
-        float directionSmoothingTimeConstant = 0.05f;
+        [SerializeField, HideInInspector]
+        PlayerState state;
 
         [Header("Pointer steering")]
         [SerializeField, Min(0f)]
@@ -46,54 +28,52 @@ namespace Decoherence
         [SerializeField, Range(0.1f, 1f)]
         float pitchSin = 0.7071068f;
 
-        [Header("Gravity")]
-        [SerializeField]
-        float stickToGroundSpeed = 1f;
-
-        [SerializeField]
-        float gravity = 9.81f;
-
-        CharacterController controller;
+        [Header("Response")]
+        [Tooltip("方向滤波的时间常数 τ（秒）")]
+        [SerializeField, Min(0.001f)]
+        float directionSmoothingTimeConstant = 0.05f;
 
         Camera viewCamera;
 
-        Vector3 planarVelocity;
-
         Vector3 smoothedDirection;
-
-        float verticalVelocity;
-
-        public CoherenceState State
-        {
-            get => state;
-            set => state = value;
-        }
-
-        public float MaxSpeed => state == CoherenceState.Coherent ? coherentSpeed : decoherentSpeed;
-
-        public Vector3 PlanarVelocity => planarVelocity;
-
-        public float CurrentSpeed => planarVelocity.magnitude;
 
         void Awake()
         {
-            controller = GetComponent<CharacterController>();
+            ResolveReferences();
             viewCamera = Camera.main;
+        }
+
+        void OnValidate()
+        {
+            ResolveReferences();
         }
 
         void Update()
         {
-            float dt = Time.deltaTime;
-            if (dt <= 0f)
+            float deltaTime = Time.deltaTime;
+
+            if (deltaTime <= 0f || motor == null || state == null)
             {
                 return;
             }
 
+            Mouse mouse = Mouse.current;
+
+            state.HoldIntent = mouse != null && mouse.leftButton.isPressed;
+
+            if (!state.CanMove)
+            {
+                motor.ClearIntent();
+                return;
+            }
+
             Vector3 targetDirection = ReadPointerDirection(out float throttle);
+
             if (targetDirection != Vector3.zero)
             {
-                float k = 1f - Mathf.Exp(-dt / directionSmoothingTimeConstant);
+                float k = 1f - Mathf.Exp(-deltaTime / directionSmoothingTimeConstant);
                 smoothedDirection = Vector3.Lerp(smoothedDirection, targetDirection, k);
+
                 if (smoothedDirection.sqrMagnitude > 1e-6f)
                 {
                     smoothedDirection.Normalize();
@@ -104,14 +84,7 @@ namespace Decoherence
                 smoothedDirection = Vector3.zero;
             }
 
-            Vector3 targetVelocity = smoothedDirection * (throttle * MaxSpeed);
-            planarVelocity = targetVelocity;
-
-            verticalVelocity = controller.isGrounded
-                ? -stickToGroundSpeed
-                : verticalVelocity - gravity * dt;
-
-            controller.Move((planarVelocity + Vector3.up * verticalVelocity) * dt);
+            motor.SetIntent(smoothedDirection * (throttle * state.MaxSpeed));
         }
 
         Vector3 ReadPointerDirection(out float throttle)
@@ -121,6 +94,7 @@ namespace Decoherence
             if (viewCamera == null)
             {
                 viewCamera = Camera.main;
+
                 if (viewCamera == null)
                 {
                     return Vector3.zero;
@@ -128,6 +102,7 @@ namespace Decoherence
             }
 
             Mouse mouse = Mouse.current;
+
             if (mouse == null)
             {
                 return Vector3.zero;
@@ -135,6 +110,7 @@ namespace Decoherence
 
             Ray ray = viewCamera.ScreenPointToRay(mouse.position.ReadValue());
             var groundPlane = new Plane(Vector3.up, Vector3.zero);
+
             if (!groundPlane.Raycast(ray, out float enter))
             {
                 return Vector3.zero;
@@ -145,15 +121,28 @@ namespace Decoherence
 
             // 深度方向按 sin(俯角) 折算，使屏幕上的圆对应地面上的圆
             float screenDistance = new Vector2(delta.x, delta.z * pitchSin).magnitude;
+
             if (screenDistance <= deadZone || delta.sqrMagnitude < 1e-6f)
             {
                 return Vector3.zero;
             }
 
             throttle = Mathf.Clamp01((screenDistance - deadZone) / Mathf.Max(fullSpeedRadius - deadZone, 1e-3f));
+
             return delta.normalized;
         }
 
-    }
+        void ResolveReferences()
+        {
+            if (motor == null)
+            {
+                motor = GetComponent<CharacterMotor>();
+            }
 
+            if (state == null)
+            {
+                state = GetComponent<PlayerState>();
+            }
+        }
+    }
 }

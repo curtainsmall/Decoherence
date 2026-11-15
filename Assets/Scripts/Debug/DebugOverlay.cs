@@ -10,9 +10,11 @@ namespace Decoherence
     public sealed class DebugOverlay : MonoBehaviour
     {
         [SerializeField]
-        PlayerMotor target;
+        CharacterMotor target;
 
         [SerializeField]
+        PlayerState state;
+
         PlayerCoherence pool;
 
         [SerializeField]
@@ -26,7 +28,12 @@ namespace Decoherence
         {
             if (target == null)
             {
-                target = FindFirstObjectByType<PlayerMotor>();
+                target = FindFirstObjectByType<CharacterMotor>();
+            }
+
+            if (state == null)
+            {
+                state = FindFirstObjectByType<PlayerState>();
             }
 
             if (pool == null)
@@ -52,8 +59,8 @@ namespace Decoherence
 
             GUI.Box(new Rect(x - 6f, y - 6f, width + 12f, lineHeight * 3f + 12f), GUIContent.none, boxStyle);
 
-            string state = target.State == CoherenceState.Decoherent ? "Decoherent" : "Coherent";
-            GUI.Label(new Rect(x, y, width, lineHeight), "State : " + state, labelStyle);
+            string label = state != null && state.State == CoherenceState.Decoherent ? "Decoherent" : "Coherent";
+            GUI.Label(new Rect(x, y, width, lineHeight), "State : " + label, labelStyle);
             GUI.Label(new Rect(x, y + lineHeight, width, lineHeight), "Speed : " + target.CurrentSpeed.ToString("F2") + " m/s", labelStyle);
 
             if (pool != null)

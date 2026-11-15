@@ -1,21 +1,19 @@
 using System;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 namespace Decoherence
 {
     /// <summary>
-    /// coherence 单资源 + 状态切换。
-    /// 按住鼠标左键进入退相干态（不朽、可攻击、按时间消耗）；松开立即回到相干态（可被伤害、回复）。
+    /// coherence 单资源结算。
     /// 该数值同时是攻击预算、机动预算与生命值；归零即结束。
+    /// 状态与输入意图由 PlayerState 提供，本类只做资源的加减与死亡判定。
     /// </summary>
-    [RequireComponent(typeof(PlayerMotor))]
     [DisallowMultipleComponent]
     public sealed class PlayerCoherence : MonoBehaviour
     {
-        [Header("Reference")]
-        [SerializeField]
-        PlayerMotor motor;
+        [Header("Wiring")]
+        [SerializeField, HideInInspector]
+        PlayerState state;
 
         [Header("Pool")]
         [SerializeField, Min(1f)]
@@ -27,19 +25,15 @@ namespace Decoherence
         [SerializeField, Min(0f)]
         float regenPerSecond = 20f;
 
-        [Header("Input")]
-        [SerializeField]
-        bool readMouseInput = true;
-
         public float Coherence { get; private set; }
 
         public float MaxCoherence => maxCoherence;
 
         public float Normalized => maxCoherence > 0f ? Coherence / maxCoherence : 0f;
 
-        public bool IsDead { get; private set; }
+        public bool IsDead => state != null && !state.IsAlive;
 
-        public bool IsDecoherent => motor != null && motor.State == CoherenceState.Decoherent;
+        public bool IsDecoherent => state != null && state.IsDecoherent;
 
         public event Action Died;
 
@@ -47,9 +41,9 @@ namespace Decoherence
 
         void Awake()
         {
-            if (motor == null)
+            if (state == null)
             {
-                motor = GetComponent<PlayerMotor>();
+                state = GetComponent<PlayerState>();
             }
 
             Coherence = maxCoherence;
@@ -57,16 +51,12 @@ namespace Decoherence
 
         void Update()
         {
-            if (IsDead)
+            if (IsDead || state == null)
             {
                 return;
             }
 
-            bool holding = readMouseInput
-                           && Mouse.current != null
-                           && Mouse.current.leftButton.isPressed;
-
-            Tick(holding, Time.deltaTime);
+            Tick(state.HoldIntent, Time.deltaTime);
         }
 
         /// <summary>推进一帧：holding 为“按住状态键”的意图。</summary>
@@ -77,7 +67,7 @@ namespace Decoherence
                 return;
             }
 
-            bool wasDecoherent = IsDecoherent;
+            bool wasDecoherent = state.IsDecoherent;
             bool enter = holding && Coherence > 0f;
 
             if (enter)
@@ -87,30 +77,22 @@ namespace Decoherence
                 if (Coherence <= 0f)
                 {
                     Coherence = 0f;
-                    SetState(CoherenceState.Coherent);
+                    state.State = CoherenceState.Coherent;
                     Die();
                     return;
                 }
 
-                SetState(CoherenceState.Decoherent);
+                state.State = CoherenceState.Decoherent;
             }
             else
             {
                 Coherence = Mathf.Min(maxCoherence, Coherence + regenPerSecond * deltaTime);
-                SetState(CoherenceState.Coherent);
+                state.State = CoherenceState.Coherent;
             }
 
-            if (wasDecoherent != IsDecoherent)
+            if (wasDecoherent != state.IsDecoherent)
             {
                 StateChanged?.Invoke();
-            }
-        }
-
-        void SetState(CoherenceState state)
-        {
-            if (motor != null)
-            {
-                motor.State = state;
             }
         }
 
@@ -121,12 +103,7 @@ namespace Decoherence
                 return;
             }
 
-            IsDead = true;
-
-            if (motor != null)
-            {
-                motor.enabled = false;
-            }
+            state.MarkDead();
 
             Died?.Invoke();
             Debug.Log("coherence depleted — run over.", this);
@@ -140,7 +117,7 @@ namespace Decoherence
                 return;
             }
 
-            bool wasDecoherent = IsDecoherent;
+            bool wasDecoherent = state != null && state.IsDecoherent;
 
             Coherence -= amount;
 
@@ -150,7 +127,11 @@ namespace Decoherence
             }
 
             Coherence = 0f;
-            SetState(CoherenceState.Coherent);
+
+            if (state != null)
+            {
+                state.State = CoherenceState.Coherent;
+            }
 
             if (wasDecoherent)
             {
@@ -170,7 +151,5 @@ namespace Decoherence
 
             Coherence = Mathf.Min(maxCoherence, Coherence + amount);
         }
-
     }
-
 }

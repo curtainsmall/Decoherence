@@ -12,7 +12,7 @@ namespace Decoherence
     public sealed class GroundRing : MonoBehaviour
     {
         [Header("Placement")]
-        [Tooltip("圆环跟随的目标；留空时自动查找场景中的 PlayerMotor")]
+        [Tooltip("圆环跟随的目标；留空时自动查找场景中的 CharacterMotor")]
         [SerializeField]
         Transform follow;
 
@@ -112,7 +112,7 @@ namespace Decoherence
         {
             if (follow == null)
             {
-                PlayerMotor player = FindFirstObjectByType<PlayerMotor>();
+                CharacterMotor player = FindFirstObjectByType<CharacterMotor>();
                 if (player != null)
                 {
                     follow = player.transform;

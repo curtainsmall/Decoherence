@@ -13,7 +13,10 @@ namespace Decoherence
     {
         [Header("Sources")]
         [SerializeField]
-        PlayerMotor motor;
+        CharacterMotor motor;
+
+        [SerializeField]
+        PlayerState state;
 
         [SerializeField]
         PlayerCoherence coherence;
@@ -185,7 +188,12 @@ namespace Decoherence
         {
             if (motor == null)
             {
-                motor = GetComponentInParent<PlayerMotor>();
+                motor = GetComponentInParent<CharacterMotor>();
+            }
+
+            if (state == null)
+            {
+                state = GetComponentInParent<PlayerState>();
             }
 
             if (coherence == null)
@@ -195,7 +203,7 @@ namespace Decoherence
 
             if (blockyBody == null && motor != null)
             {
-                blockyBody = motor.transform.Find("Body");
+                blockyBody = motor.transform.Find("CharacterBody");
             }
 
             // 只关渲染器、不关 GameObject：Body 上的 BlockyBodyAnimator 必须继续转身，
@@ -261,7 +269,7 @@ namespace Decoherence
                 return;
             }
 
-            bool decoherent = motor != null && motor.State == CoherenceState.Decoherent;
+            bool decoherent = state != null && state.State == CoherenceState.Decoherent;
             visibility = Mathf.MoveTowards(visibility, decoherent ? 1f : 0f, dt / transitionDuration);
 
             SetBodyVisible(visibility < 0.5f);

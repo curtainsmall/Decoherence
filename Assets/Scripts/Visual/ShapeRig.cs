@@ -12,16 +12,16 @@ namespace Decoherence
     {
         [Header("References")]
         [Tooltip("胶囊身体 mesh；整棵子树里唯一允许被 squash 的节点")]
-        [SerializeField] private Transform body;
+        [SerializeField, HideInInspector] private Transform body;
         [Tooltip("承载头部滞后/倾斜的空节点")]
-        [SerializeField] private Transform headPivot;
-        [SerializeField] private Transform head;
-        [SerializeField] private Transform shoulderLeft;
-        [SerializeField] private Transform shoulderRight;
-        [SerializeField] private Transform handLeft;
-        [SerializeField] private Transform handRight;
-        [SerializeField] private Transform armLeft;
-        [SerializeField] private Transform armRight;
+        [SerializeField, HideInInspector] private Transform headPivot;
+        [SerializeField, HideInInspector] private Transform head;
+        [SerializeField, HideInInspector] private Transform shoulderLeft;
+        [SerializeField, HideInInspector] private Transform shoulderRight;
+        [SerializeField, HideInInspector] private Transform handLeft;
+        [SerializeField, HideInInspector] private Transform handRight;
+        [SerializeField, HideInInspector] private Transform armLeft;
+        [SerializeField, HideInInspector] private Transform armRight;
 
         [Header("Capability")]
         [Tooltip("关闭时整条臂链（肩/手/臂/插槽）失效，相关参数不参与计算")]

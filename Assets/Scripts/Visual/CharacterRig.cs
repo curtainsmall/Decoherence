@@ -12,10 +12,10 @@ namespace Decoherence
     public sealed class CharacterRig : MonoBehaviour
     {
         [Header("References")]
-        [SerializeField] private ShapeRig shapeRig;
+        [SerializeField, HideInInspector] private ShapeRig shapeRig;
         [Tooltip("为空时用 SetMotion 推入速度（敌人用）")]
-        [SerializeField] private PlayerMotor motor;
-        [SerializeField] private Transform headPivot;
+        [SerializeField, HideInInspector] private PlayerMotor motor;
+        [SerializeField, HideInInspector] private Transform headPivot;
 
         [Header("Hop")]
         [Tooltip("一次跳跃对应的位移（米）")]

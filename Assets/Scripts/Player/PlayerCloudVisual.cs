@@ -4,64 +4,19 @@ using UnityEngine.Rendering;
 namespace Decoherence
 {
     /// <summary>
-    /// 退相干态的身体：不可见的核心 + 8 根 2D 柱（加速度驱动滞后、弹簧阻尼回正），
-    /// 柱尖经闭合三次 B 样条生成触发边界，其外再偏移一层可见的暗影。
-    /// 判定完全基于该多边形（2D，XZ 平面）。
+    /// 退相干态的外观：读取 PlayerCloudField 给出的边界与核心位置，在边界内生成烟团网格，
+    /// 自己处理可见性淡入淡出与身体渲染器的开合。不读取任何玩法状态。
     /// </summary>
     [DisallowMultipleComponent]
-    public sealed class CloudBody : MonoBehaviour
+    public sealed class PlayerCloudVisual : MonoBehaviour
     {
-        [Header("Sources")]
-        [SerializeField]
-        CharacterMotor motor;
+        [Header("Wiring")]
+        [SerializeField, HideInInspector]
+        PlayerCloudField field;
 
-        [SerializeField]
-        PlayerState state;
-
-        [SerializeField]
-        PlayerCoherence coherence;
-
-        [Tooltip("退相干时隐藏的方块身体")]
-        [SerializeField]
-        Transform blockyBody;
-
-        [Header("Pillars (2D)")]
-        [SerializeField, Range(3, 24)]
-        int pillarCount = 8;
-
-        [SerializeField, Min(0.05f)]
-        float pillarLength = 0.40f;
-
-        [SerializeField, Min(0.05f)]
-        float lowCoherencePillarLength = 0.60f;
-
-        [Tooltip("角刚度：作用于 1 rad 偏角的角加速度，单位 rad/s²")]
-        [SerializeField, Min(1f)]
-        float angularStiffness = 55f;
-
-        [Tooltip("角阻尼，单位 1/s")]
-        [SerializeField, Min(0f)]
-        float angularDamping = 7f;
-
-        [Tooltip("核心加速度到角加速度的增益")]
-        [SerializeField, Min(0f)]
-        float accelerationGain = 2.6f;
-
-        [SerializeField, Range(10f, 89f)]
-        float maxLagDegrees = 78f;
-
-        [SerializeField, Min(0.05f)]
-        float rayHeight = 0.5f;
-
-        [SerializeField, Min(0f)]
-        float wallClearance = 0.03f;
-
-        [SerializeField]
-        LayerMask barrierMask = ~0;
-
-        [Header("Boundary")]
-        [SerializeField, Range(16, 128)]
-        int boundarySamples = 64;
+        [Tooltip("退相干时隐藏的身体外观")]
+        [SerializeField, HideInInspector]
+        Transform body;
 
         [Header("Shadow")]
         [SerializeField]
@@ -69,6 +24,7 @@ namespace Decoherence
 
         [SerializeField]
         Color shadowColor = new Color(0.010f, 0.012f, 0.018f, 1f);
+
         [SerializeField, Range(0f, 1f)]
         float shadowAlpha = 1f;
 
@@ -132,8 +88,6 @@ namespace Decoherence
         [SerializeField, Min(0.1f)]
         float noiseScale = 2.6f;
 
-        Transform shadowTransform;
-
         Mesh shadowMesh;
 
         MeshFilter shadowFilter;
@@ -160,25 +114,11 @@ namespace Decoherence
 
         float[] pendingValue;
 
-        float[] lag;
-
-        float[] lagVelocity;
-
-        Vector2[] tips;
-
-        Vector2[] boundary;
-
-        Vector2 centroid;
-
-        Vector2 previousVelocity;
-
         float visibility;
 
         Renderer[] bodyRenderers;
 
         bool bodyVisible = true;
-
-        public float Area { get; private set; }
 
         public float Visibility => visibility;
 
@@ -186,45 +126,7 @@ namespace Decoherence
 
         void Awake()
         {
-            if (motor == null)
-            {
-                motor = GetComponentInParent<CharacterMotor>();
-            }
-
-            if (state == null)
-            {
-                state = GetComponentInParent<PlayerState>();
-            }
-
-            if (coherence == null)
-            {
-                coherence = GetComponentInParent<PlayerCoherence>();
-            }
-
-            if (blockyBody == null && motor != null)
-            {
-                blockyBody = motor.transform.Find("CharacterBody");
-            }
-
-            // 只关渲染器、不关 GameObject：Body 上的 BlockyBodyAnimator 必须继续转身，
-            // 否则脚印环/朝向弧的来源朝向会停在退相干前的值。
-            if (blockyBody != null)
-            {
-                bodyRenderers = blockyBody.GetComponentsInChildren<Renderer>(true);
-            }
-
-            pillarCount = Mathf.Max(3, pillarCount);
-
-            // 序列化下来的默认 LayerMask 为 0（Nothing），那样射线什么都打不到，按“全部层”处理
-            if (barrierMask.value == 0)
-            {
-                barrierMask = ~0;
-            }
-
-            lag = new float[pillarCount];
-            lagVelocity = new float[pillarCount];
-            tips = new Vector2[pillarCount];
-            boundary = new Vector2[Mathf.Max(16, boundarySamples)];
+            ResolveReferences();
 
             puffOrder = new int[Mathf.Max(1, puffCount)];
             puffDepth = new float[puffOrder.Length];
@@ -237,14 +139,23 @@ namespace Decoherence
                 viewCamera = Camera.main;
             }
 
+            if (body != null)
+            {
+                bodyRenderers = body.GetComponentsInChildren<Renderer>(true);
+            }
+
             CreateShadowObject();
+        }
+
+        void OnValidate()
+        {
+            ResolveReferences();
         }
 
         void CreateShadowObject()
         {
             var go = new GameObject("ShadowMesh");
             go.transform.SetParent(transform, false);
-            shadowTransform = go.transform;
 
             shadowFilter = go.AddComponent<MeshFilter>();
             shadowRenderer = go.AddComponent<MeshRenderer>();
@@ -263,41 +174,36 @@ namespace Decoherence
 
         void Update()
         {
-            float dt = Time.deltaTime;
-            if (dt <= 0f || lag == null)
+            float deltaTime = Time.deltaTime;
+
+            if (deltaTime <= 0f)
             {
                 return;
             }
 
-            bool decoherent = state != null && state.State == CoherenceState.Decoherent;
-            visibility = Mathf.MoveTowards(visibility, decoherent ? 1f : 0f, dt / transitionDuration);
+            bool active = field != null && field.Active;
+
+            visibility = Mathf.MoveTowards(visibility, active ? 1f : 0f, deltaTime / Mathf.Max(0.01f, transitionDuration));
 
             SetBodyVisible(visibility < 0.5f);
 
             bool visible = visibility > 0.001f;
+
             if (shadowRenderer != null)
             {
                 shadowRenderer.enabled = visible;
             }
 
-            if (!visible)
+            if (!visible || field == null || field.Boundary == null)
             {
-                previousVelocity = GetPlanarVelocity();
                 return;
             }
 
-            float normalized = coherence != null ? Mathf.Clamp01(coherence.Normalized) : 1f;
-            float length = Mathf.Lerp(lowCoherencePillarLength, pillarLength, normalized);
-
-            SimulatePillars(dt, length);
-            BuildBoundary();
             BuildCloudMesh();
-            ApplyShadowMaterial(normalized);
-
-            previousVelocity = GetPlanarVelocity();
+            ApplyShadowMaterial(field.CoherenceNormalized);
         }
 
-        /// <summary>隐藏/显示方块身体：只切渲染器，保持 Body 上的动画与转身照常运行。</summary>
+        /// <summary>隐藏/显示身体外观：只切渲染器，保持节点上的动画与转身照常运行。</summary>
         void SetBodyVisible(bool visible)
         {
             if (bodyVisible == visible)
@@ -309,12 +215,12 @@ namespace Decoherence
 
             if (bodyRenderers == null)
             {
-                if (blockyBody == null)
+                if (body == null)
                 {
                     return;
                 }
 
-                bodyRenderers = blockyBody.GetComponentsInChildren<Renderer>(true);
+                bodyRenderers = body.GetComponentsInChildren<Renderer>(true);
             }
 
             for (int i = 0; i < bodyRenderers.Length; i++)
@@ -326,131 +232,10 @@ namespace Decoherence
             }
         }
 
-        Vector2 GetPlanarVelocity()
-        {
-            if (motor == null)
-            {
-                return Vector2.zero;
-            }
-
-            Vector3 velocity = motor.PlanarVelocity;
-            return new Vector2(velocity.x, velocity.z);
-        }
-
-        void SimulatePillars(float dt, float length)
-        {
-            Vector2 velocity = GetPlanarVelocity();
-            Vector2 acceleration = dt > 0f ? (velocity - previousVelocity) / dt : Vector2.zero;
-            acceleration = Vector2.ClampMagnitude(acceleration, 80f);
-
-            Vector2 origin = GetCorePosition();
-            float maxLag = maxLagDegrees * Mathf.Deg2Rad;
-
-            for (int i = 0; i < pillarCount; i++)
-            {
-                float baseAngle = (Mathf.PI * 2f * i) / pillarCount;
-                float absolute = baseAngle + lag[i];
-                Vector2 direction = new Vector2(Mathf.Cos(absolute), Mathf.Sin(absolute));
-
-                // 伪力对枢轴的扭矩：τ ∝ cross(direction, acceleration)
-                float cross = direction.x * acceleration.y - direction.y * acceleration.x;
-                float angularAcceleration = accelerationGain * cross / Mathf.Max(length, 0.05f);
-                angularAcceleration -= angularStiffness * lag[i];
-                angularAcceleration -= angularDamping * lagVelocity[i];
-
-                lagVelocity[i] += angularAcceleration * dt;
-                lag[i] += lagVelocity[i] * dt;
-
-                if (lag[i] > maxLag)
-                {
-                    lag[i] = maxLag;
-                    lagVelocity[i] = 0f;
-                }
-                else if (lag[i] < -maxLag)
-                {
-                    lag[i] = -maxLag;
-                    lagVelocity[i] = 0f;
-                }
-
-                float reach = ResolveReach(origin, direction, length);
-                tips[i] = origin + direction * reach;
-            }
-        }
-
-        /// <summary>柱子为刚体：柱尖被墙体截停，返回该方向上可达到的长度。</summary>
-        float ResolveReach(Vector2 origin, Vector2 direction, float length)
-        {
-            Vector3 start = new Vector3(origin.x, rayHeight, origin.y);
-            Vector3 dir = new Vector3(direction.x, 0f, direction.y);
-
-            if (Physics.Raycast(start, dir, out RaycastHit hit, length + wallClearance, barrierMask, QueryTriggerInteraction.Ignore))
-            {
-                return Mathf.Max(0f, hit.distance - wallClearance);
-            }
-
-            return length;
-        }
-
-        Vector2 GetCorePosition()
-        {
-            Vector3 position = transform.position;
-            return new Vector2(position.x, position.z);
-        }
-
-        /// <summary>闭合三次 B 样条穿过 8 个控制点，采样为边界多边形。</summary>
-        void BuildBoundary()
-        {
-            int count = Mathf.Max(16, boundarySamples);
-            if (boundary == null || boundary.Length != count)
-            {
-                boundary = new Vector2[count];
-            }
-
-            for (int s = 0; s < count; s++)
-            {
-                float t = (s / (float)count) * pillarCount;
-                int index = Mathf.FloorToInt(t) % pillarCount;
-                float u = t - Mathf.FloorToInt(t);
-
-                Vector2 p0 = tips[(index - 1 + pillarCount) % pillarCount];
-                Vector2 p1 = tips[index];
-                Vector2 p2 = tips[(index + 1) % pillarCount];
-                Vector2 p3 = tips[(index + 2) % pillarCount];
-
-                float u2 = u * u;
-                float u3 = u2 * u;
-
-                Vector2 point =
-                    ((1f - 3f * u + 3f * u2 - u3) * p0 +
-                     (4f - 6f * u2 + 3f * u3) * p1 +
-                     (1f + 3f * u + 3f * u2 - 3f * u3) * p2 +
-                     (u3) * p3) / 6f;
-
-                boundary[s] = point;
-            }
-
-            Area = ComputeArea(boundary);
-        }
-
-        static float ComputeArea(Vector2[] polygon)
-        {
-            float sum = 0f;
-            for (int i = 0; i < polygon.Length; i++)
-            {
-                Vector2 a = polygon[i];
-                Vector2 b = polygon[(i + 1) % polygon.Length];
-                sum += a.x * b.y - b.x * a.y;
-            }
-
-            return Mathf.Abs(sum) * 0.5f;
-        }
-
-        /// <summary>
-        /// 判定区即生成域：烟团只在柱尖多边形内生成，靠近边界的一圈按到边距离淡出。
-        /// 这样看到的“云”和判定区是同一份数据，粒子不参与命中计算。
-        /// </summary>
         void BuildCloudMesh()
         {
+            Vector2[] boundary = field.Boundary;
+
             if (shadowMesh == null || boundary == null || puffOrder == null)
             {
                 return;
@@ -459,11 +244,9 @@ namespace Decoherence
             int count = boundary.Length;
             int active = Mathf.Clamp(puffCount, 0, puffOrder.Length);
 
-            // 采样基点用核心本身而不是多边形质心：柱子被加速度甩开时质心会跟着偏移，
-            // 那样整团云会“离开”角色；以核心为基点，形状可以歪，但云始终围在身上。
-            Vector2 core = GetCorePosition();
+            Vector2 core = field.Core;
+            Vector2 centroid = Vector2.zero;
 
-            centroid = Vector2.zero;
             for (int i = 0; i < count; i++)
             {
                 centroid += boundary[i];
@@ -472,6 +255,7 @@ namespace Decoherence
             centroid /= count;
 
             float boundaryRadius = 0.1f;
+
             for (int i = 0; i < count; i++)
             {
                 boundaryRadius = Mathf.Max(boundaryRadius, Vector2.Distance(boundary[i], core));
@@ -507,12 +291,9 @@ namespace Decoherence
                 }
             }
 
-            // 相对核心的局部坐标：ShadowMesh 是 Cloud 的子物体，跟着玩家一起走
-            Vector2 origin = core;
-
             Vector3 right = Vector3.right;
             Vector3 up = Vector3.forward;
-            Vector3 viewPosition = origin;
+            Vector3 viewPosition = core;
             Vector3 viewForward = Vector3.down;
 
             if (viewCamera != null)
@@ -520,7 +301,7 @@ namespace Decoherence
                 Transform cam = viewCamera.transform;
                 right = cam.right;
                 up = cam.up;
-                viewPosition = cam.transform.position;
+                viewPosition = cam.position;
                 viewForward = cam.forward;
             }
 
@@ -529,7 +310,6 @@ namespace Decoherence
 
             for (int i = 0; i < active; i++)
             {
-                // 每个烟团一组固定相位/种子，帧率不影响分布
                 float seedPhase = Hash(i, 1);
                 float cycle = Mathf.Floor(cycleTime + seedPhase);
                 float phase = cycleTime + seedPhase - cycle;
@@ -616,7 +396,7 @@ namespace Decoherence
 
                 Vector3 center3 = pendingPosition[i];
                 float size = pendingSize[i];
-                Vector3 corner = center3 - new Vector3(origin.x, 0f, origin.y);
+                Vector3 corner = center3 - new Vector3(core.x, 0f, core.y);
 
                 int v = slot * 4;
                 shadowVertices[v] = corner - right * size - up * size;
@@ -639,15 +419,33 @@ namespace Decoherence
             shadowMesh.RecalculateBounds();
         }
 
-        /// <summary>把 value 映射到 edge0..edge1 后再平滑到 0..1（Mathf.SmoothStep 本身是按值插值，不是归一化）。</summary>
-        static float Smooth01(float edge0, float edge1, float value)
+        void ApplyShadowMaterial(float normalized)
         {
-            if (Mathf.Approximately(edge0, edge1))
+            if (shadowInstance == null)
             {
-                return value < edge0 ? 0f : 1f;
+                return;
             }
 
-            return Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(edge0, edge1, value));
+            shadowInstance.SetColor("_Color", shadowColor);
+            shadowInstance.SetFloat("_Alpha", shadowAlpha);
+            shadowInstance.SetFloat("_NoiseScale", noiseScale * 3f);
+            // 相干度越低，边缘越散
+            shadowInstance.SetFloat("_NoiseStrength", Mathf.Lerp(0.62f, 0.30f, normalized));
+        }
+
+        static float DistanceToSegment(Vector2 point, Vector2 a, Vector2 b)
+        {
+            Vector2 ab = b - a;
+            float lengthSquared = ab.sqrMagnitude;
+
+            if (lengthSquared < 1e-6f)
+            {
+                return Vector2.Distance(point, a);
+            }
+
+            float t = Mathf.Clamp01(Vector2.Dot(point - a, ab) / lengthSquared);
+
+            return Vector2.Distance(point, a + ab * t);
         }
 
         /// <summary>确定性哈希：同一下标/场次永远得到同一个 0..1 值。</summary>
@@ -663,94 +461,33 @@ namespace Decoherence
             }
         }
 
-        void ApplyShadowMaterial(float normalized)
+        /// <summary>把 value 映射到 edge0..edge1 后再平滑到 0..1。</summary>
+        static float Smooth01(float edge0, float edge1, float value)
         {
-            if (shadowInstance == null)
+            if (Mathf.Approximately(edge0, edge1))
             {
-                return;
+                return value < edge0 ? 0f : 1f;
             }
 
-            shadowInstance.SetColor("_Color", shadowColor);
-            shadowInstance.SetFloat("_Alpha", shadowAlpha);
-            shadowInstance.SetFloat("_NoiseScale", noiseScale * 3f);
-            // 相干度越低，边缘越散
-            shadowInstance.SetFloat("_NoiseStrength", Mathf.Lerp(0.62f, 0.30f, normalized));
+            return Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(edge0, edge1, value));
         }
 
-        /// <summary>敌人是否进入触发区（与边界多边形同一份数据）。</summary>
-        public bool Overlaps(Collider other)
+        void ResolveReferences()
         {
-            if (other == null || boundary == null)
+            if (field == null)
             {
-                return false;
+                field = GetComponentInParent<PlayerCloudField>();
             }
 
-            Vector3 center = other.bounds.center;
-            Vector3 extents = other.bounds.extents;
-            float radius = Mathf.Max(extents.x, extents.z);
-
-            Vector2 point = new Vector2(center.x, center.z);
-
-            if (IsInsidePolygon(point))
+            if (body == null)
             {
-                return true;
-            }
+                CharacterMotor motor = GetComponentInParent<CharacterMotor>();
 
-            return DistanceToPolygon(point) <= radius;
-        }
-
-        bool IsInsidePolygon(Vector2 point)
-        {
-            bool inside = false;
-            int count = boundary.Length;
-
-            for (int i = 0, j = count - 1; i < count; j = i++)
-            {
-                Vector2 a = boundary[i];
-                Vector2 b = boundary[j];
-
-                if ((a.y > point.y) != (b.y > point.y))
+                if (motor != null)
                 {
-                    float x = (b.x - a.x) * (point.y - a.y) / (b.y - a.y) + a.x;
-                    if (point.x < x)
-                    {
-                        inside = !inside;
-                    }
+                    body = motor.transform.Find("CharacterBody");
                 }
             }
-
-            return inside;
         }
-
-        float DistanceToPolygon(Vector2 point)
-        {
-            float best = float.MaxValue;
-            int count = boundary.Length;
-
-            for (int i = 0; i < count; i++)
-            {
-                Vector2 a = boundary[i];
-                Vector2 b = boundary[(i + 1) % count];
-                best = Mathf.Min(best, DistanceToSegment(point, a, b));
-            }
-
-            return best;
-        }
-
-        static float DistanceToSegment(Vector2 point, Vector2 a, Vector2 b)
-        {
-            Vector2 ab = b - a;
-            float lengthSquared = ab.sqrMagnitude;
-
-            if (lengthSquared < 1e-6f)
-            {
-                return Vector2.Distance(point, a);
-            }
-
-            float t = Mathf.Clamp01(Vector2.Dot(point - a, ab) / lengthSquared);
-            return Vector2.Distance(point, a + ab * t);
-        }
-
     }
-
 }

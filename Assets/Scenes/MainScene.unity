@@ -801,7 +801,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 692868162}
-  - component: {fileID: 692868163}
+  - component: {fileID: 692868164}
   m_Layer: 0
   m_Name: Cloud
   m_TagString: Untagged
@@ -821,10 +821,11 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 724128762}
   m_Father: {fileID: 2018958194}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &692868163
+--- !u!114 &692868164
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -833,13 +834,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 692868161}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3dc081f14b9c81f4aa39d525201e2019, type: 3}
+  m_Script: {fileID: 11500000, guid: 889594b9870200c44bd43fc1d8474c50, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Decoherence.CloudBody
+  m_EditorClassIdentifier: Assembly-CSharp::Decoherence.PlayerCloudField
   motor: {fileID: 2018958198}
   state: {fileID: 2018958199}
   coherence: {fileID: 2018958197}
-  blockyBody: {fileID: 257572354}
   pillarCount: 8
   pillarLength: 0.72
   lowCoherencePillarLength: 1
@@ -853,6 +853,52 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 4294967295
   boundarySamples: 64
+--- !u!1 &724128761
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 724128762}
+  - component: {fileID: 724128763}
+  m_Layer: 0
+  m_Name: Visual
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &724128762
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 724128761}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 692868162}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &724128763
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 724128761}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 13855fe910e1ebf499e816b0ae470d12, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Decoherence.PlayerCloudVisual
+  field: {fileID: 692868164}
+  body: {fileID: 257572354}
   shadowMaterial: {fileID: 2100000, guid: c938e7fc1ce36e34c897bfe6a4368d1a, type: 2}
   shadowColor: {r: 0.01, g: 0.012, b: 0.018, a: 1}
   shadowAlpha: 1

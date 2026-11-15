@@ -184,7 +184,7 @@ namespace Decoherence
         {
             if (body == null)
             {
-                body = FindChild("Capsule");
+                body = FindChild("Body");
             }
 
             if (headPivot == null)

@@ -12,59 +12,104 @@ namespace Decoherence
     public sealed class CharacterRig : MonoBehaviour
     {
         [Header("References")]
-        [SerializeField, HideInInspector] private ShapeRig shapeRig;
+        [SerializeField, HideInInspector]
+        ShapeRig shapeRig;
+
         [Tooltip("为空时用 SetMotion 推入速度（敌人用）")]
-        [SerializeField, HideInInspector] private PlayerMotor motor;
-        [SerializeField, HideInInspector] private Transform headPivot;
+        [SerializeField, HideInInspector]
+        PlayerMotor motor;
+
+        [SerializeField, HideInInspector]
+        Transform headPivot;
 
         [Header("Hop")]
         [Tooltip("一次跳跃对应的位移（米）")]
-        [SerializeField, Min(0.1f)] private float hopLength = 0.7f;
-        [SerializeField, Min(0f)] private float hopHeight = 0.10f;
+        [SerializeField, Min(0.1f)]
+        float hopLength = 0.7f;
+
+        [SerializeField, Min(0f)]
+        float hopHeight = 0.10f;
+
         [Tooltip("频率上限；超出后让步幅变长，避免高速抖成噪点")]
-        [SerializeField, Min(0.5f)] private float maxHopHz = 4f;
-        [SerializeField, Min(0f)] private float hopResponse = 26f;
+        [SerializeField, Min(0.5f)]
+        float maxHopHz = 4f;
+
+        [SerializeField, Min(0f)]
+        float hopResponse = 26f;
 
         [Header("Squash")]
         [Tooltip("只在触地瞬间压缩：实心物体不该随步频持续变形")]
-        [SerializeField, Range(0f, 0.3f)] private float contactSquash = 0.06f;
+        [SerializeField, Range(0f, 0.3f)]
+        float contactSquash = 0.06f;
+
         [Tooltip("触地脉冲的角度窗口，越小越像一次撞击")]
-        [SerializeField, Range(5f, 170f)] private float impactWindowDegrees = 70f;
-        [SerializeField, Min(0.1f)] private float squashResponse = 26f;
+        [SerializeField, Range(5f, 170f)]
+        float impactWindowDegrees = 70f;
+
+        [SerializeField, Min(0.1f)]
+        float squashResponse = 26f;
 
         [Header("Idle")]
-        [SerializeField, Range(0f, 0.05f)] private float idleBreath = 0.008f;
-        [SerializeField, Min(0.01f)] private float breathHz = 0.45f;
+        [SerializeField, Range(0f, 0.05f)]
+        float idleBreath = 0.008f;
+
+        [SerializeField, Min(0.01f)]
+        float breathHz = 0.45f;
 
         [Header("Lean")]
-        [SerializeField, Range(0f, 45f)] private float leanMaxDegrees = 14f;
-        [SerializeField, Range(0f, 30f)] private float turnLeanDegrees = 8f;
-        [SerializeField, Min(0.1f)] private float leanResponse = 9f;
-        [SerializeField, Min(0f)] private float turnDegreesPerSecond = 720f;
+        [SerializeField, Range(0f, 45f)]
+        float leanMaxDegrees = 14f;
+
+        [SerializeField, Range(0f, 30f)]
+        float turnLeanDegrees = 8f;
+
+        [SerializeField, Min(0.1f)]
+        float leanResponse = 9f;
+
+        [SerializeField, Min(0f)]
+        float turnDegreesPerSecond = 720f;
 
         [Header("Head")]
-        [SerializeField, Min(0f)] private float headLagDistance = 0.02f;
-        [SerializeField, Min(0.1f)] private float headLagResponse = 8f;
-        [SerializeField, Range(0f, 1f)] private float headCounterTilt = 0.3f;
+        [SerializeField, Min(0f)]
+        float headLagDistance = 0.02f;
 
-        private Vector3 baseLocalPosition;
-        private Vector3 headBasePosition;
-        private Vector3 pushedVelocity;
-        private Vector3 previousVelocity;
-        private Vector3 headOffset;
-        private Quaternion currentYaw = Quaternion.identity;
-        private float phase;
-        private float breathPhase;
-        private float hopOffset;
-        private float squash = 1f;
-        private float lean;
-        private float sideLean;
-        private float previousYawAngle;
+        [SerializeField, Min(0.1f)]
+        float headLagResponse = 8f;
 
-        public float Speed { get; private set; }
-        public float HopPhase => phase;
+        [SerializeField, Range(0f, 1f)]
+        float headCounterTilt = 0.3f;
 
-        private void Awake()
+        Vector3 baseLocalPosition;
+
+        Vector3 headBasePosition;
+
+        Vector3 pushedVelocity;
+
+        Vector3 previousVelocity;
+
+        Vector3 headOffset;
+
+        Quaternion currentYaw = Quaternion.identity;
+
+        float phase;
+
+        float breathPhase;
+
+        float hopOffset;
+
+        float squash = 1f;
+
+        float lean;
+
+        float sideLean;
+
+        float previousYawAngle;
+
+        float Speed { get; set; }
+
+        float HopPhase => phase;
+
+        void Awake()
         {
             ResolveReferences();
 
@@ -74,13 +119,11 @@ namespace Decoherence
 
             if (shapeRig != null)
             {
-                // ShapeRig 的 Apply 是幂等的，先确保基础几何已就位再取头部基点
-                shapeRig.Apply();
                 headBasePosition = shapeRig.HeadPivotBasePosition;
             }
         }
 
-        private void OnValidate()
+        void OnValidate()
         {
             ResolveReferences();
         }
@@ -91,7 +134,7 @@ namespace Decoherence
             pushedVelocity = new Vector3(planarVelocity.x, 0f, planarVelocity.z);
         }
 
-        private void Update()
+        void Update()
         {
             float dt = Time.deltaTime;
 
@@ -115,7 +158,7 @@ namespace Decoherence
             previousVelocity = velocity;
         }
 
-        private void UpdateHop(float dt, float speed)
+        void UpdateHop(float dt, float speed)
         {
             // hopHeight 为 0 表示不要弹跳：实心角色贴地滑行，只保留倾斜与头部滞后
             if (hopHeight <= 0.0001f)
@@ -145,7 +188,7 @@ namespace Decoherence
             transform.localPosition = baseLocalPosition + Vector3.up * hopOffset;
         }
 
-        private void UpdateSquash(float dt, float speed)
+        void UpdateSquash(float dt, float speed)
         {
             if (shapeRig == null)
             {
@@ -181,7 +224,7 @@ namespace Decoherence
             shapeRig.SetSquash(squash);
         }
 
-        private void UpdateLean(float dt, Vector3 velocity, float speed, float maxSpeed)
+        void UpdateLean(float dt, Vector3 velocity, float speed, float maxSpeed)
         {
             var planar = new Vector3(velocity.x, 0f, velocity.z);
 
@@ -207,7 +250,7 @@ namespace Decoherence
             transform.rotation = currentYaw * Quaternion.Euler(lean, 0f, sideLean);
         }
 
-        private void UpdateHead(float dt, Vector3 velocity)
+        void UpdateHead(float dt, Vector3 velocity)
         {
             if (headPivot == null)
             {
@@ -228,7 +271,7 @@ namespace Decoherence
             headPivot.localRotation = Quaternion.Euler(-lean * headCounterTilt, 0f, -sideLean * headCounterTilt);
         }
 
-        private void ResolveReferences()
+        void ResolveReferences()
         {
             if (shapeRig == null)
             {
@@ -245,5 +288,7 @@ namespace Decoherence
                 headPivot = shapeRig.HeadPivot;
             }
         }
+
     }
+
 }

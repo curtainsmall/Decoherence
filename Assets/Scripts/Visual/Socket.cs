@@ -6,15 +6,22 @@ namespace Decoherence
     public enum SocketKey
     {
         None = 0,
+
         HandLeft = 1,
+
         HandRight = 2,
+
         Back = 3,
+
         Head = 4,
 
         // 以下属于武器自身
         Grip = 10,
+
         ForeGrip = 11,
+
         Muzzle = 12,
+
     }
 
     /// <summary>
@@ -25,9 +32,14 @@ namespace Decoherence
     [DisallowMultipleComponent]
     public sealed class Socket : MonoBehaviour
     {
-        [SerializeField] private SocketKey key = SocketKey.None;
-        [SerializeField] private float gizmoRadius = 0.05f;
-        [SerializeField] private Color gizmoColor = new Color(1f, 0.78f, 0.25f, 1f);
+        [SerializeField]
+        SocketKey key = SocketKey.None;
+
+        [SerializeField]
+        float gizmoRadius = 0.05f;
+
+        [SerializeField]
+        Color gizmoColor = new Color(1f, 0.78f, 0.25f, 1f);
 
         public SocketKey Key => key;
 
@@ -52,16 +64,18 @@ namespace Decoherence
             return null;
         }
 
-        private void OnDrawGizmosSelected()
+        void OnDrawGizmosSelected()
         {
             Gizmos.color = gizmoColor;
             Gizmos.DrawWireSphere(transform.position, gizmoRadius);
             Gizmos.DrawRay(transform.position, transform.forward * (gizmoRadius * 3f));
         }
 
-        private void OnValidate()
+        void OnValidate()
         {
             gizmoRadius = Mathf.Max(0.005f, gizmoRadius);
         }
+
     }
+
 }

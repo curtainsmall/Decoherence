@@ -14,26 +14,38 @@ namespace Decoherence
     public sealed class PlayerCoherence : MonoBehaviour
     {
         [Header("Reference")]
-        [SerializeField] private PlayerMotor motor;
+        [SerializeField]
+        PlayerMotor motor;
 
         [Header("Pool")]
-        [SerializeField, Min(1f)] private float maxCoherence = 100f;
-        [SerializeField, Min(0f)] private float drainPerSecond = 12.5f;
-        [SerializeField, Min(0f)] private float regenPerSecond = 20f;
+        [SerializeField, Min(1f)]
+        float maxCoherence = 100f;
+
+        [SerializeField, Min(0f)]
+        float drainPerSecond = 12.5f;
+
+        [SerializeField, Min(0f)]
+        float regenPerSecond = 20f;
 
         [Header("Input")]
-        [SerializeField] private bool readMouseInput = true;
+        [SerializeField]
+        bool readMouseInput = true;
 
         public float Coherence { get; private set; }
+
         public float MaxCoherence => maxCoherence;
+
         public float Normalized => maxCoherence > 0f ? Coherence / maxCoherence : 0f;
+
         public bool IsDead { get; private set; }
+
         public bool IsDecoherent => motor != null && motor.State == CoherenceState.Decoherent;
 
         public event Action Died;
+
         public event Action StateChanged;
 
-        private void Awake()
+        void Awake()
         {
             if (motor == null)
             {
@@ -43,7 +55,7 @@ namespace Decoherence
             Coherence = maxCoherence;
         }
 
-        private void Update()
+        void Update()
         {
             if (IsDead)
             {
@@ -58,7 +70,7 @@ namespace Decoherence
         }
 
         /// <summary>推进一帧：holding 为“按住状态键”的意图。</summary>
-        public void Tick(bool holding, float deltaTime)
+        void Tick(bool holding, float deltaTime)
         {
             if (IsDead || deltaTime <= 0f)
             {
@@ -94,7 +106,7 @@ namespace Decoherence
             }
         }
 
-        private void SetState(CoherenceState state)
+        void SetState(CoherenceState state)
         {
             if (motor != null)
             {
@@ -102,7 +114,7 @@ namespace Decoherence
             }
         }
 
-        private void Die()
+        void Die()
         {
             if (IsDead)
             {
@@ -119,5 +131,7 @@ namespace Decoherence
             Died?.Invoke();
             Debug.Log("coherence depleted — run over.", this);
         }
+
     }
+
 }

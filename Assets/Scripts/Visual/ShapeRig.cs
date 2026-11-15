@@ -12,71 +12,124 @@ namespace Decoherence
     {
         [Header("References")]
         [Tooltip("胶囊身体 mesh；整棵子树里唯一允许被 squash 的节点")]
-        [SerializeField, HideInInspector] private Transform body;
+        [SerializeField, HideInInspector]
+        Transform body;
+
         [Tooltip("承载头部滞后/倾斜的空节点")]
-        [SerializeField, HideInInspector] private Transform headPivot;
-        [SerializeField, HideInInspector] private Transform head;
-        [SerializeField, HideInInspector] private Transform shoulderLeft;
-        [SerializeField, HideInInspector] private Transform shoulderRight;
-        [SerializeField, HideInInspector] private Transform handLeft;
-        [SerializeField, HideInInspector] private Transform handRight;
-        [SerializeField, HideInInspector] private Transform armLeft;
-        [SerializeField, HideInInspector] private Transform armRight;
+        [SerializeField, HideInInspector]
+        Transform headPivot;
+
+        [SerializeField, HideInInspector]
+        Transform head;
+
+        [SerializeField, HideInInspector]
+        Transform shoulderLeft;
+
+        [SerializeField, HideInInspector]
+        Transform shoulderRight;
+
+        [SerializeField, HideInInspector]
+        Transform handLeft;
+
+        [SerializeField, HideInInspector]
+        Transform handRight;
+
+        [SerializeField, HideInInspector]
+        Transform armLeft;
+
+        [SerializeField, HideInInspector]
+        Transform armRight;
 
         [Header("Capability")]
         [Tooltip("关闭时整条臂链（肩/手/臂/插槽）失效，相关参数不参与计算")]
-        [SerializeField] private bool hasArm = false;
+        [SerializeField]
+        bool hasArm = false;
 
         [Header("Body")]
-        [SerializeField, Min(0.05f)] private float bodyHeight = 1.30f;
-        [SerializeField, Min(0.02f)] private float bodyRadius = 0.32f;
+        [SerializeField, Min(0.05f)]
+        float bodyHeight = 1.30f;
+
+        [SerializeField, Min(0.02f)]
+        float bodyRadius = 0.32f;
 
         [Header("Head")]
-        [SerializeField, Min(0.02f)] private float headRadius = 0.30f;
+        [SerializeField, Min(0.02f)]
+        float headRadius = 0.30f;
+
         [Tooltip("头陷进身体的高度")]
-        [SerializeField, Min(0f)] private float headOverlap = 0.10f;
+        [SerializeField, Min(0f)]
+        float headOverlap = 0.10f;
 
         [Header("Arm")]
         [Tooltip("臂长（肩到手的距离）")]
-        [SerializeField, Min(0.05f)] private float armLength = 0.45f;
-        [SerializeField, Min(0.01f)] private float armThickness = 0.08f;
+        [SerializeField, Min(0.05f)]
+        float armLength = 0.45f;
+
+        [SerializeField, Min(0.01f)]
+        float armThickness = 0.08f;
+
         [Tooltip("肩高占身体高度的比例")]
-        [SerializeField, Range(0f, 1f)] private float shoulderHeight = 0.85f;
+        [SerializeField, Range(0f, 1f)]
+        float shoulderHeight = 0.85f;
+
         [Tooltip("肩的水平位置占身体半径的比例")]
-        [SerializeField, Range(0f, 1.5f)] private float shoulderSpread = 0.95f;
+        [SerializeField, Range(0f, 1.5f)]
+        float shoulderSpread = 0.95f;
 
         [Header("Materials")]
-        [SerializeField] private Material bodyMaterial;
-        [SerializeField] private Material headMaterial;
-        [SerializeField] private Material armMaterial;
+        [SerializeField]
+        Material bodyMaterial;
 
-        private float squash = 1f;
-        private Vector3 headBasePosition = Vector3.zero;
+        [SerializeField]
+        Material headMaterial;
+
+        [SerializeField]
+        Material armMaterial;
+
+        float squash = 1f;
+
+        Vector3 headBasePosition = Vector3.zero;
+
+        bool applied;
 
         public bool HasArm => hasArm;
-        public float BodyHeight => Mathf.Max(bodyRadius * 2f + 0.001f, bodyHeight) * squash;
-        public float BodyRadius => Mathf.Max(0.02f, bodyRadius);
-        public float HeadRadius => Mathf.Max(0.02f, headRadius);
-        public float Squash => squash;
-        public Transform Body => body;
-        public Transform HeadPivot => headPivot;
-        /// <summary>头部枢轴的基础本地位置；动画只在其上叠加偏移，不要覆盖。</summary>
-        public Vector3 HeadPivotBasePosition => headBasePosition;
 
-        private void Awake()
+        public float BodyHeight => Mathf.Max(bodyRadius * 2f + 0.001f, bodyHeight) * squash;
+
+        public float BodyRadius => Mathf.Max(0.02f, bodyRadius);
+
+        public float HeadRadius => Mathf.Max(0.02f, headRadius);
+
+        float Squash => squash;
+
+        Transform Body => body;
+
+        public Transform HeadPivot => headPivot;
+
+        /// <summary>头部枢轴的基础本地位置；动画只在其上叠加偏移，不要覆盖。</summary>
+        public Vector3 HeadPivotBasePosition
+        {
+            get
+            {
+                EnsureApplied();
+                return headBasePosition;
+            }
+        }
+
+        void Awake()
         {
             ResolveReferences();
             Apply();
         }
 
-        private void OnValidate()
+        void OnValidate()
         {
             ResolveReferences();
             Apply();
         }
 
         /// <summary>按参数重建几何。幂等：重复调用结果一致。</summary>
-        public void Apply()
+        void Apply()
         {
             ResolveReferences();
 
@@ -104,11 +157,24 @@ namespace Decoherence
             SetActive(shoulderRight, hasArm);
 
             SetMaterial(body, bodyMaterial);
+
+            applied = true;
+        }
+
+        /// <summary>保证几何已按当前参数应用；读取派生值前内部调用。</summary>
+        void EnsureApplied()
+        {
+            if (!applied)
+            {
+                Apply();
+            }
         }
 
         /// <summary>竖直压扁系数，1 为原始高度。脚底保持在本地 y = 0。</summary>
         public void SetSquash(float factor)
         {
+            EnsureApplied();
+
             float clamped = Mathf.Clamp(factor, 0.2f, 2f);
 
             if (Mathf.Approximately(clamped, squash))
@@ -120,7 +186,7 @@ namespace Decoherence
             ApplyBodyTransform();
         }
 
-        private void ApplyBodyTransform()
+        void ApplyBodyTransform()
         {
             if (body == null)
             {
@@ -147,7 +213,7 @@ namespace Decoherence
             }
         }
 
-        private void ApplyArm(Transform shoulder, Transform hand, Transform arm, float side)
+        void ApplyArm(Transform shoulder, Transform hand, Transform arm, float side)
         {
             if (shoulder == null)
             {
@@ -180,7 +246,7 @@ namespace Decoherence
             }
         }
 
-        private void ResolveReferences()
+        void ResolveReferences()
         {
             if (body == null)
             {
@@ -228,7 +294,7 @@ namespace Decoherence
             }
         }
 
-        private Transform FindChild(string childName)
+        Transform FindChild(string childName)
         {
             Transform[] all = GetComponentsInChildren<Transform>(true);
 
@@ -243,7 +309,7 @@ namespace Decoherence
             return null;
         }
 
-        private static void SetActive(Transform target, bool active)
+        static void SetActive(Transform target, bool active)
         {
             if (target != null && target.gameObject.activeSelf != active)
             {
@@ -251,7 +317,7 @@ namespace Decoherence
             }
         }
 
-        private static void SetMaterial(Transform target, Material material)
+        static void SetMaterial(Transform target, Material material)
         {
             if (target == null || material == null)
             {
@@ -266,7 +332,7 @@ namespace Decoherence
             }
         }
 
-        private void OnDrawGizmosSelected()
+        void OnDrawGizmosSelected()
         {
             Gizmos.color = new Color(0.4f, 0.9f, 1f, 0.8f);
 
@@ -286,5 +352,7 @@ namespace Decoherence
                 Gizmos.DrawWireSphere(body.position, Mathf.Max(0.02f, bodyRadius));
             }
         }
+
     }
+
 }

@@ -13,52 +13,80 @@ namespace Decoherence
     {
         [Header("Placement")]
         [Tooltip("圆环跟随的目标；留空时自动查找场景中的 PlayerMotor")]
-        [SerializeField] private Transform follow;
+        [SerializeField]
+        Transform follow;
+
         [Tooltip("朝向来源；留空时取跟随目标的 Body 子物体")]
-        [SerializeField] private Transform facing;
-        [SerializeField] private float surfaceOffset = 0.012f;
-        [SerializeField] private float radialOffset = 0f;
+        [SerializeField]
+        Transform facing;
+
+        [SerializeField]
+        float surfaceOffset = 0.012f;
+
+        [SerializeField]
+        float radialOffset = 0f;
 
         [Header("Arc")]
         [Tooltip("360 为整环；小于 360 时以局部 +Z 为中心绘制一段弧")]
-        [SerializeField, Range(10f, 360f)] private float sweepDegrees = 360f;
-        [SerializeField] private bool arrowHead = false;
+        [SerializeField, Range(10f, 360f)]
+        float sweepDegrees = 360f;
+
+        [SerializeField]
+        bool arrowHead = false;
 
         [Header("Size")]
-        [SerializeField] private bool autoFromCharacterController = true;
-        [SerializeField, Min(0.05f)] private float radius = 0.35f;
-        [SerializeField, Min(0.005f)] private float thickness = 0.06f;
-        [SerializeField, Range(12, 160)] private int segments = 48;
+        [SerializeField]
+        bool autoFromCharacterController = true;
+
+        [SerializeField, Min(0.05f)]
+        float radius = 0.35f;
+
+        [SerializeField, Min(0.005f)]
+        float thickness = 0.06f;
+
+        [SerializeField, Range(12, 160)]
+        int segments = 48;
 
         [Header("Look")]
-        [SerializeField] private Material material;
-        [SerializeField] private Color color = Color.white;
+        [SerializeField]
+        Material material;
 
-        private MeshFilter meshFilter;
-        private MeshRenderer meshRenderer;
-        private Mesh mesh;
-        private Material runtimeMaterial;
+        [SerializeField]
+        Color color = Color.white;
 
-        private float builtRadius = -1f;
-        private float builtThickness = -1f;
-        private float builtSweep = -1f;
-        private float builtRadialOffset = 0f;
-        private bool builtArrow;
-        private int builtSegments = -1;
+        MeshFilter meshFilter;
 
-        private void OnEnable()
+        MeshRenderer meshRenderer;
+
+        Mesh mesh;
+
+        Material runtimeMaterial;
+
+        float builtRadius = -1f;
+
+        float builtThickness = -1f;
+
+        float builtSweep = -1f;
+
+        float builtRadialOffset = 0f;
+
+        bool builtArrow;
+
+        int builtSegments = -1;
+
+        void OnEnable()
         {
             EnsureComponents();
             Rebuild();
         }
 
-        private void OnValidate()
+        void OnValidate()
         {
             EnsureComponents();
             Rebuild();
         }
 
-        private void Update()
+        void Update()
         {
             SyncPlacement();
 
@@ -74,13 +102,13 @@ namespace Decoherence
             }
         }
 
-        private void LateUpdate()
+        void LateUpdate()
         {
             SyncPlacement();
         }
 
         /// <summary>把圆环贴到跟随目标脚下的地面；朝向取 facing 的水平朝向。</summary>
-        private void SyncPlacement()
+        void SyncPlacement()
         {
             if (follow == null)
             {
@@ -107,7 +135,7 @@ namespace Decoherence
                 : Quaternion.identity;
         }
 
-        private void EnsureComponents()
+        void EnsureComponents()
         {
             if (meshFilter == null)
             {
@@ -120,7 +148,7 @@ namespace Decoherence
             }
         }
 
-        private float ResolveRadius()
+        float ResolveRadius()
         {
             if (!autoFromCharacterController)
             {
@@ -135,7 +163,7 @@ namespace Decoherence
             return controller != null ? controller.radius : radius;
         }
 
-        private void Rebuild()
+        void Rebuild()
         {
             if (meshFilter == null || meshRenderer == null)
             {
@@ -231,7 +259,7 @@ namespace Decoherence
             builtSegments = segments;
         }
 
-        private void ApplyMaterial()
+        void ApplyMaterial()
         {
             meshRenderer.shadowCastingMode = ShadowCastingMode.Off;
             meshRenderer.receiveShadows = false;
@@ -300,5 +328,7 @@ namespace Decoherence
 
             meshRenderer.sharedMaterial = runtimeMaterial;
         }
+
     }
+
 }

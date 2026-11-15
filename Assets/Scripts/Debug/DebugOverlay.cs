@@ -9,14 +9,20 @@ namespace Decoherence
     [DisallowMultipleComponent]
     public sealed class DebugOverlay : MonoBehaviour
     {
-        [SerializeField] private PlayerMotor target;
-        [SerializeField] private PlayerCoherence pool;
-        [SerializeField] private Vector2 margin = new Vector2(10f, 10f);
+        [SerializeField]
+        PlayerMotor target;
 
-        private GUIStyle labelStyle;
-        private GUIStyle boxStyle;
+        [SerializeField]
+        PlayerCoherence pool;
 
-        private void Awake()
+        [SerializeField]
+        Vector2 margin = new Vector2(10f, 10f);
+
+        GUIStyle labelStyle;
+
+        GUIStyle boxStyle;
+
+        void Awake()
         {
             if (target == null)
             {
@@ -29,7 +35,7 @@ namespace Decoherence
             }
         }
 
-        private void OnGUI()
+        void OnGUI()
         {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
             if (target == null)
@@ -59,7 +65,8 @@ namespace Decoherence
         }
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        private void EnsureStyles()
+
+        void EnsureStyles()
         {
             if (labelStyle == null)
             {
@@ -77,6 +84,9 @@ namespace Decoherence
                 boxStyle = new GUIStyle(GUI.skin.box);
             }
         }
+
 #endif
+
     }
+
 }

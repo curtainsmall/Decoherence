@@ -12,97 +12,176 @@ namespace Decoherence
     public sealed class CloudBody : MonoBehaviour
     {
         [Header("Sources")]
-        [SerializeField] private PlayerMotor motor;
-        [SerializeField] private PlayerCoherence coherence;
+        [SerializeField]
+        PlayerMotor motor;
+
+        [SerializeField]
+        PlayerCoherence coherence;
+
         [Tooltip("退相干时隐藏的方块身体")]
-        [SerializeField] private Transform blockyBody;
+        [SerializeField]
+        Transform blockyBody;
 
         [Header("Pillars (2D)")]
-        [SerializeField, Range(3, 24)] private int pillarCount = 8;
-        [SerializeField, Min(0.05f)] private float pillarLength = 0.40f;
-        [SerializeField, Min(0.05f)] private float lowCoherencePillarLength = 0.60f;
+        [SerializeField, Range(3, 24)]
+        int pillarCount = 8;
+
+        [SerializeField, Min(0.05f)]
+        float pillarLength = 0.40f;
+
+        [SerializeField, Min(0.05f)]
+        float lowCoherencePillarLength = 0.60f;
+
         [Tooltip("角刚度：作用于 1 rad 偏角的角加速度，单位 rad/s²")]
-        [SerializeField, Min(1f)] private float angularStiffness = 55f;
+        [SerializeField, Min(1f)]
+        float angularStiffness = 55f;
+
         [Tooltip("角阻尼，单位 1/s")]
-        [SerializeField, Min(0f)] private float angularDamping = 7f;
+        [SerializeField, Min(0f)]
+        float angularDamping = 7f;
+
         [Tooltip("核心加速度到角加速度的增益")]
-        [SerializeField, Min(0f)] private float accelerationGain = 2.6f;
-        [SerializeField, Range(10f, 89f)] private float maxLagDegrees = 78f;
-        [SerializeField, Min(0.05f)] private float rayHeight = 0.5f;
-        [SerializeField, Min(0f)] private float wallClearance = 0.03f;
-        [SerializeField] private LayerMask barrierMask = ~0;
+        [SerializeField, Min(0f)]
+        float accelerationGain = 2.6f;
+
+        [SerializeField, Range(10f, 89f)]
+        float maxLagDegrees = 78f;
+
+        [SerializeField, Min(0.05f)]
+        float rayHeight = 0.5f;
+
+        [SerializeField, Min(0f)]
+        float wallClearance = 0.03f;
+
+        [SerializeField]
+        LayerMask barrierMask = ~0;
 
         [Header("Boundary")]
-        [SerializeField, Range(16, 128)] private int boundarySamples = 64;
+        [SerializeField, Range(16, 128)]
+        int boundarySamples = 64;
 
         [Header("Shadow")]
-        [SerializeField] private Material shadowMaterial;
-        [SerializeField] private Color shadowColor = new Color(0.010f, 0.012f, 0.018f, 1f);
-        [SerializeField, Range(0f, 1f)] private float shadowAlpha = 1f;
-        [SerializeField, Min(0.01f)] private float transitionDuration = 0.15f;
+        [SerializeField]
+        Material shadowMaterial;
+
+        [SerializeField]
+        Color shadowColor = new Color(0.010f, 0.012f, 0.018f, 1f);
+        [SerializeField, Range(0f, 1f)]
+        float shadowAlpha = 1f;
+
+        [SerializeField, Min(0.01f)]
+        float transitionDuration = 0.15f;
 
         [Header("Puffs")]
         [Tooltip("同时存在的烟团数量；整团云只用一个 mesh")]
-        [SerializeField, Range(8, 200)] private int puffCount = 56;
+        [SerializeField, Range(8, 200)]
+        int puffCount = 56;
+
         [Tooltip("单个烟团半径（米）")]
-        [SerializeField, Min(0.02f)] private float puffRadius = 0.22f;
-        [SerializeField, Min(0.1f)] private float puffLifetime = 1.8f;
+        [SerializeField, Min(0.02f)]
+        float puffRadius = 0.22f;
+
+        [SerializeField, Min(0.1f)]
+        float puffLifetime = 1.8f;
+
         [Tooltip("生命周期内向上飘升的高度（米）")]
-        [SerializeField, Min(0f)] private float puffRise = 0.65f;
+        [SerializeField, Min(0f)]
+        float puffRise = 0.65f;
+
         [Tooltip("水平漂移幅度（米）")]
-        [SerializeField, Min(0f)] private float puffWander = 0.07f;
+        [SerializeField, Min(0f)]
+        float puffWander = 0.07f;
+
         [Tooltip("生长期尺寸增益")]
-        [SerializeField, Range(0f, 1f)] private float puffGrow = 0.45f;
-        [SerializeField, Range(0f, 1f)] private float puffAlpha = 0.55f;
+        [SerializeField, Range(0f, 1f)]
+        float puffGrow = 0.45f;
+
+        [SerializeField, Range(0f, 1f)]
+        float puffAlpha = 0.55f;
+
         [Tooltip("贴近判定边界时的淡出带宽度（米）")]
-        [SerializeField, Min(0.01f)] private float edgeFadeWidth = 0.14f;
+        [SerializeField, Min(0.01f)]
+        float edgeFadeWidth = 0.14f;
+
         [Tooltip("0 表示内外一致，1 表示中心比边缘浓得多")]
-        [SerializeField, Range(0f, 1f)] private float centerBias = 0.55f;
+        [SerializeField, Range(0f, 1f)]
+        float centerBias = 0.55f;
 
         [Header("Camera")]
         [Tooltip("billboard 朝向用的相机；留空时取 Camera.main")]
-        [SerializeField] private Camera viewCamera;
+        [SerializeField]
+        Camera viewCamera;
 
         [Header("Volume (3D)")]
         [Tooltip("云底面离地高度（米）；整团云都在这个高度之上")]
-        [SerializeField, Min(0f)] private float baseHeight = 0.20f;
+        [SerializeField, Min(0f)]
+        float baseHeight = 0.20f;
+
         [Tooltip("云的竖向高度（米）；判定仍是 2D，这个高度只影响观感")]
-        [SerializeField, Min(0.1f)] private float cloudHeight = 1.15f;
+        [SerializeField, Min(0.1f)]
+        float cloudHeight = 1.15f;
+
         [Tooltip("起伏的速度")]
-        [SerializeField, Min(0f)] private float noiseSpeed = 0.5f;
+        [SerializeField, Min(0f)]
+        float noiseSpeed = 0.5f;
+
         [Tooltip("起伏的空间频率")]
-        [SerializeField, Min(0.1f)] private float noiseScale = 2.6f;
+        [SerializeField, Min(0.1f)]
+        float noiseScale = 2.6f;
 
-        private Transform shadowTransform;
-        private Mesh shadowMesh;
-        private MeshFilter shadowFilter;
-        private MeshRenderer shadowRenderer;
-        private Material shadowInstance;
-        private Vector3[] shadowVertices;
-        private Color[] shadowColors;
-        private Vector2[] shadowUvs;
-        private int[] shadowTriangles;
-        private float[] puffDepth;
-        private int[] puffOrder;
-        private Vector3[] pendingPosition;
-        private float[] pendingSize;
-        private float[] pendingValue;
+        Transform shadowTransform;
 
-        private float[] lag;
-        private float[] lagVelocity;
-        private Vector2[] tips;
-        private Vector2[] boundary;
-        private Vector2 centroid;
-        private Vector2 previousVelocity;
-        private float visibility;
-        private Renderer[] bodyRenderers;
-        private bool bodyVisible = true;
+        Mesh shadowMesh;
+
+        MeshFilter shadowFilter;
+
+        MeshRenderer shadowRenderer;
+
+        Material shadowInstance;
+
+        Vector3[] shadowVertices;
+
+        Color[] shadowColors;
+
+        Vector2[] shadowUvs;
+
+        int[] shadowTriangles;
+
+        float[] puffDepth;
+
+        int[] puffOrder;
+
+        Vector3[] pendingPosition;
+
+        float[] pendingSize;
+
+        float[] pendingValue;
+
+        float[] lag;
+
+        float[] lagVelocity;
+
+        Vector2[] tips;
+
+        Vector2[] boundary;
+
+        Vector2 centroid;
+
+        Vector2 previousVelocity;
+
+        float visibility;
+
+        Renderer[] bodyRenderers;
+
+        bool bodyVisible = true;
 
         public float Area { get; private set; }
+
         public float Visibility => visibility;
+
         public bool IsVisible => visibility > 0.01f;
 
-        private void Awake()
+        void Awake()
         {
             if (motor == null)
             {
@@ -153,7 +232,7 @@ namespace Decoherence
             CreateShadowObject();
         }
 
-        private void CreateShadowObject()
+        void CreateShadowObject()
         {
             var go = new GameObject("ShadowMesh");
             go.transform.SetParent(transform, false);
@@ -174,7 +253,7 @@ namespace Decoherence
             shadowFilter.sharedMesh = shadowMesh;
         }
 
-        private void Update()
+        void Update()
         {
             float dt = Time.deltaTime;
             if (dt <= 0f || lag == null)
@@ -211,7 +290,7 @@ namespace Decoherence
         }
 
         /// <summary>隐藏/显示方块身体：只切渲染器，保持 Body 上的动画与转身照常运行。</summary>
-        private void SetBodyVisible(bool visible)
+        void SetBodyVisible(bool visible)
         {
             if (bodyVisible == visible)
             {
@@ -239,7 +318,7 @@ namespace Decoherence
             }
         }
 
-        private Vector2 GetPlanarVelocity()
+        Vector2 GetPlanarVelocity()
         {
             if (motor == null)
             {
@@ -250,7 +329,7 @@ namespace Decoherence
             return new Vector2(velocity.x, velocity.z);
         }
 
-        private void SimulatePillars(float dt, float length)
+        void SimulatePillars(float dt, float length)
         {
             Vector2 velocity = GetPlanarVelocity();
             Vector2 acceleration = dt > 0f ? (velocity - previousVelocity) / dt : Vector2.zero;
@@ -291,7 +370,7 @@ namespace Decoherence
         }
 
         /// <summary>柱子为刚体：柱尖被墙体截停，返回该方向上可达到的长度。</summary>
-        private float ResolveReach(Vector2 origin, Vector2 direction, float length)
+        float ResolveReach(Vector2 origin, Vector2 direction, float length)
         {
             Vector3 start = new Vector3(origin.x, rayHeight, origin.y);
             Vector3 dir = new Vector3(direction.x, 0f, direction.y);
@@ -304,14 +383,14 @@ namespace Decoherence
             return length;
         }
 
-        private Vector2 GetCorePosition()
+        Vector2 GetCorePosition()
         {
             Vector3 position = transform.position;
             return new Vector2(position.x, position.z);
         }
 
         /// <summary>闭合三次 B 样条穿过 8 个控制点，采样为边界多边形。</summary>
-        private void BuildBoundary()
+        void BuildBoundary()
         {
             int count = Mathf.Max(16, boundarySamples);
             if (boundary == null || boundary.Length != count)
@@ -345,7 +424,7 @@ namespace Decoherence
             Area = ComputeArea(boundary);
         }
 
-        private static float ComputeArea(Vector2[] polygon)
+        static float ComputeArea(Vector2[] polygon)
         {
             float sum = 0f;
             for (int i = 0; i < polygon.Length; i++)
@@ -362,7 +441,7 @@ namespace Decoherence
         /// 判定区即生成域：烟团只在柱尖多边形内生成，靠近边界的一圈按到边距离淡出。
         /// 这样看到的“云”和判定区是同一份数据，粒子不参与命中计算。
         /// </summary>
-        private void BuildCloudMesh()
+        void BuildCloudMesh()
         {
             if (shadowMesh == null || boundary == null || puffOrder == null)
             {
@@ -553,7 +632,7 @@ namespace Decoherence
         }
 
         /// <summary>把 value 映射到 edge0..edge1 后再平滑到 0..1（Mathf.SmoothStep 本身是按值插值，不是归一化）。</summary>
-        private static float Smooth01(float edge0, float edge1, float value)
+        static float Smooth01(float edge0, float edge1, float value)
         {
             if (Mathf.Approximately(edge0, edge1))
             {
@@ -564,7 +643,7 @@ namespace Decoherence
         }
 
         /// <summary>确定性哈希：同一下标/场次永远得到同一个 0..1 值。</summary>
-        private static float Hash(int index, int salt)
+        static float Hash(int index, int salt)
         {
             unchecked
             {
@@ -576,7 +655,7 @@ namespace Decoherence
             }
         }
 
-        private void ApplyShadowMaterial(float normalized)
+        void ApplyShadowMaterial(float normalized)
         {
             if (shadowInstance == null)
             {
@@ -612,7 +691,7 @@ namespace Decoherence
             return DistanceToPolygon(point) <= radius;
         }
 
-        private bool IsInsidePolygon(Vector2 point)
+        bool IsInsidePolygon(Vector2 point)
         {
             bool inside = false;
             int count = boundary.Length;
@@ -635,7 +714,7 @@ namespace Decoherence
             return inside;
         }
 
-        private float DistanceToPolygon(Vector2 point)
+        float DistanceToPolygon(Vector2 point)
         {
             float best = float.MaxValue;
             int count = boundary.Length;
@@ -650,7 +729,7 @@ namespace Decoherence
             return best;
         }
 
-        private static float DistanceToSegment(Vector2 point, Vector2 a, Vector2 b)
+        static float DistanceToSegment(Vector2 point, Vector2 a, Vector2 b)
         {
             Vector2 ab = b - a;
             float lengthSquared = ab.sqrMagnitude;
@@ -663,5 +742,7 @@ namespace Decoherence
             float t = Mathf.Clamp01(Vector2.Dot(point - a, ab) / lengthSquared);
             return Vector2.Distance(point, a + ab * t);
         }
+
     }
+
 }

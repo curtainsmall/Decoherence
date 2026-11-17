@@ -3,7 +3,7 @@ using UnityEngine;
 namespace Decoherence
 {
     /// <summary>
-    /// 退相干态的玩家是虚体：按层对关闭/恢复与敌人之间的碰撞。
+    /// 退相干态与冲刺中的玩家是虚体：按层对关闭/恢复与敌人之间的碰撞。
     /// 用层的碰撞矩阵而不是逐对忽略，之后生成的敌人自动适用同一条规则。
     /// </summary>
     [DisallowMultipleComponent]
@@ -12,6 +12,9 @@ namespace Decoherence
         [Header("Wiring")]
         [SerializeField, HideInInspector]
         PlayerState state;
+
+        [SerializeField, HideInInspector]
+        PlayerDash dash;
 
         [Tooltip("敌人的层；留空时按层名 Enemy 解析")]
         [SerializeField]
@@ -24,6 +27,11 @@ namespace Decoherence
             if (state == null)
             {
                 state = GetComponent<PlayerState>();
+            }
+
+            if (dash == null)
+            {
+                dash = GetComponent<PlayerDash>();
             }
 
             if (enemyLayers.value == 0)
@@ -41,7 +49,8 @@ namespace Decoherence
                 return;
             }
 
-            bool phased = state.IsDecoherent;
+            // 退相干态或冲刺中都能穿过敌人
+            bool phased = state.IsDecoherent || (dash != null && dash.IsDashing);
 
             if (phased == phasedThroughEnemies)
             {

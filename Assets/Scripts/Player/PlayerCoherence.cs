@@ -15,6 +15,9 @@ namespace Decoherence
         [SerializeField, HideInInspector]
         PlayerState state;
 
+        [SerializeField, HideInInspector]
+        PlayerDash dash;
+
         [Header("Pool")]
         [SerializeField, Min(1f)]
         float maxCoherence = 100f;
@@ -47,6 +50,11 @@ namespace Decoherence
             if (state == null)
             {
                 state = GetComponent<PlayerState>();
+            }
+
+            if (dash == null)
+            {
+                dash = GetComponent<PlayerDash>();
             }
 
             Coherence = maxCoherence;
@@ -122,6 +130,12 @@ namespace Decoherence
 
             // 退相干态是虚体：外部伤害不生效，避免穿过敌人时被接触伤害打掉资源
             if (state != null && state.IsDecoherent)
+            {
+                return;
+            }
+
+            // 冲刺期间无敌帧：整段位移都不吃伤害
+            if (dash != null && dash.IsDashing)
             {
                 return;
             }

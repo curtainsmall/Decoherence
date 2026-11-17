@@ -17,6 +17,9 @@ namespace Decoherence
         [SerializeField, HideInInspector]
         PlayerState state;
 
+        [SerializeField, HideInInspector]
+        PlayerDash dash;
+
         [Header("Pointer steering")]
         [SerializeField, Min(0f)]
         float deadZone = 0.5f;
@@ -59,11 +62,19 @@ namespace Decoherence
 
             Mouse mouse = Mouse.current;
 
-            state.HoldIntent = mouse != null && mouse.leftButton.isPressed;
+            // 左右键同义：都可以按住进入退相干
+            state.HoldIntent = mouse != null && (mouse.leftButton.isPressed || mouse.rightButton.isPressed);
 
             if (!state.CanMove)
             {
                 motor.ClearIntent();
+                return;
+            }
+
+            // 冲刺期间用冲刺速度覆盖常规走位
+            if (dash != null && dash.IsDashing)
+            {
+                motor.SetIntent(dash.DashVelocity);
                 return;
             }
 
@@ -142,6 +153,11 @@ namespace Decoherence
             if (state == null)
             {
                 state = GetComponent<PlayerState>();
+            }
+
+            if (dash == null)
+            {
+                dash = GetComponent<PlayerDash>();
             }
         }
     }

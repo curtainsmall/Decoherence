@@ -31,6 +31,13 @@ namespace Decoherence
         [SerializeField, Range(10f, 360f)]
         float sweepDegrees = 360f;
 
+        /// <summary>弧长（度），360 为整环；可在运行时修改，下一帧自动重建网格。</summary>
+        public float SweepDegrees
+        {
+            get => sweepDegrees;
+            set => sweepDegrees = Mathf.Clamp(value, 10f, 360f);
+        }
+
         [SerializeField]
         bool arrowHead = false;
 

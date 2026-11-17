@@ -41,6 +41,22 @@ namespace Decoherence
 
         public int AliveCount => spawner != null ? spawner.AliveCount : 0;
 
+        /// <summary>本波还剩多少敌人：场上存活 + 尚未生成。</summary>
+        public int RemainingCount
+        {
+            get
+            {
+                if (profile == null)
+                {
+                    return AliveCount;
+                }
+
+                WaveEntry entry = profile.GetWave(WaveIndex);
+
+                return Mathf.Max(0, AliveCount + Mathf.Max(0, entry.Count - spawnedThisWave));
+            }
+        }
+
         public event Action<int> WaveStarted;
 
         public event Action<int> WaveCleared;

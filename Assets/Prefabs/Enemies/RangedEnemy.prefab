@@ -138,10 +138,26 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2514961490634580920, guid: fa262946a268999439c1fd33136d57eb, type: 3}
+      propertyPath: outlineMaterial
+      value: 
+      objectReference: {fileID: 2100000, guid: d2b18c111cb82e04a9f02ec2c0d4a5ec, type: 2}
+    - target: {fileID: 6031153937501143077, guid: fa262946a268999439c1fd33136d57eb, type: 3}
+      propertyPath: outlineMaterial
+      value: 
+      objectReference: {fileID: 2100000, guid: d2b18c111cb82e04a9f02ec2c0d4a5ec, type: 2}
+    - target: {fileID: 6904720636034688446, guid: fa262946a268999439c1fd33136d57eb, type: 3}
+      propertyPath: material
+      value: 
+      objectReference: {fileID: 2100000, guid: d2b18c111cb82e04a9f02ec2c0d4a5ec, type: 2}
     - target: {fileID: 8390687172403119618, guid: fa262946a268999439c1fd33136d57eb, type: 3}
       propertyPath: m_Name
       value: RangedEnemy
       objectReference: {fileID: 0}
+    - target: {fileID: 9167657508833049217, guid: fa262946a268999439c1fd33136d57eb, type: 3}
+      propertyPath: material
+      value: 
+      objectReference: {fileID: 2100000, guid: d2b18c111cb82e04a9f02ec2c0d4a5ec, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
@@ -152,6 +168,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 8390687172403119618, guid: fa262946a268999439c1fd33136d57eb, type: 3}
       insertIndex: -1
       addedObject: {fileID: 9181694927061569002}
+    - targetCorrespondingSourceObject: {fileID: 8390687172403119618, guid: fa262946a268999439c1fd33136d57eb, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8204253029372132695}
   m_SourcePrefab: {fileID: 100100000, guid: fa262946a268999439c1fd33136d57eb, type: 3}
 --- !u!4 &1844269740334400466 stripped
 Transform:
@@ -185,4 +204,22 @@ MonoBehaviour:
   projectileSpeed: 14
   obstacleMask:
     serializedVersion: 2
-    m_Bits: 4294966523
+    m_Bits: 51
+--- !u!114 &8204253029372132695
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8303830872927292320}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6a60ddb974708514a92f837c137d30e1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Decoherence.EnemyOutfit
+  material: {fileID: 2100000, guid: b27506e488129214691fe7e8e73cbad1, type: 2}
+  targets:
+  - Body
+  - Head
+  - Arm_L
+  - Arm_R

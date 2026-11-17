@@ -113,10 +113,7 @@ namespace Decoherence
             if (follow == null)
             {
                 CharacterMotor player = FindFirstObjectByType<CharacterMotor>();
-                if (player != null)
-                {
-                    follow = player.transform;
-                }
+                follow = player?.transform;
             }
 
             if (follow == null || follow == transform)

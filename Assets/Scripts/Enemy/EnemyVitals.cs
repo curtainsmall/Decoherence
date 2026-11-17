@@ -67,11 +67,11 @@ namespace Decoherence
             if (Health <= 0f)
             {
                 Health = 0f;
-                Die();
+                OnDied();
             }
         }
 
-        void Die()
+        void OnDied()
         {
             if (state != null)
             {

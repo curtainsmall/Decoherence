@@ -78,7 +78,7 @@ namespace Decoherence
                 {
                     Coherence = 0f;
                     state.State = CoherenceState.Coherent;
-                    Die();
+                    OnDied();
                     return;
                 }
 
@@ -96,7 +96,7 @@ namespace Decoherence
             }
         }
 
-        void Die()
+        void OnDied()
         {
             if (IsDead)
             {
@@ -137,7 +137,7 @@ namespace Decoherence
                 state.State = CoherenceState.Coherent;
             }
 
-            Die();
+            OnDied();
         }
 
         /// <summary>回复相干度（获得奖励），不会超过上限。</summary>

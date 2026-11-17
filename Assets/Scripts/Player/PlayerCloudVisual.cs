@@ -139,10 +139,7 @@ namespace Decoherence
                 viewCamera = Camera.main;
             }
 
-            if (body != null)
-            {
-                bodyRenderers = body.GetComponentsInChildren<Renderer>(true);
-            }
+            bodyRenderers = body?.GetComponentsInChildren<Renderer>(true);
 
             CreateShadowObject();
         }
@@ -481,12 +478,7 @@ namespace Decoherence
 
             if (body == null)
             {
-                CharacterMotor motor = GetComponentInParent<CharacterMotor>();
-
-                if (motor != null)
-                {
-                    body = motor.transform.Find("CharacterBody");
-                }
+                body = GetComponentInParent<CharacterMotor>()?.transform.Find("CharacterBody");
             }
         }
     }

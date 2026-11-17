@@ -46,12 +46,7 @@ namespace Decoherence
         {
             if (target == null)
             {
-                PlayerState player = FindFirstObjectByType<PlayerState>();
-
-                if (player != null)
-                {
-                    target = player.transform;
-                }
+                target = FindFirstObjectByType<PlayerState>()?.transform;
             }
         }
     }

@@ -48,10 +48,7 @@ namespace Decoherence
         {
             Socket socket = Socket.Find(transform, SocketKey.Muzzle);
 
-            if (socket != null)
-            {
-                muzzle = socket.transform;
-            }
+            muzzle = socket?.transform;
         }
 
         bool HasLineOfFire()

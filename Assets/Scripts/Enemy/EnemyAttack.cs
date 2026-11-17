@@ -82,10 +82,7 @@ namespace Decoherence
 
         protected void DrainPlayer()
         {
-            if (player != null)
-            {
-                player.Drain(damage);
-            }
+            player?.Drain(damage);
         }
 
         void ResolveReferences()

@@ -4158,6 +4158,7 @@ GameObject:
   - component: {fileID: 872258832}
   - component: {fileID: 872258831}
   - component: {fileID: 872258833}
+  - component: {fileID: 872258834}
   m_Layer: 0
   m_Name: Hud
   m_TagString: Untagged
@@ -4219,6 +4220,25 @@ MonoBehaviour:
   margin: {x: 24, y: 20}
   width: 220
   titleColor: {r: 0.75, g: 0.95, b: 1, a: 1}
+--- !u!114 &872258834
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 872258830}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 826cbdb293862d04bb18664bf2e9e962, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Decoherence.EnemyHealthBars
+  headHeight: 1.62
+  barSize: {x: 40, y: 5}
+  offsetPixels: 10
+  refreshInterval: 0.4
+  backgroundColor: {r: 0.02, g: 0.03, b: 0.05, a: 0.75}
+  fullColor: {r: 0.75, g: 0.95, b: 1, a: 1}
+  emptyColor: {r: 1, g: 0.32, b: 0.18, a: 1}
 --- !u!1 &897169607
 GameObject:
   m_ObjectHideFlags: 0

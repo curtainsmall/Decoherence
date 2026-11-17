@@ -35,6 +35,8 @@ namespace Decoherence
 
         public float Health { get; private set; }
 
+        public float MaxHealth => maxHealth;
+
         public bool IsDead => Health <= 0f;
 
         void Awake()

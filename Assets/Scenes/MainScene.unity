@@ -4189,6 +4189,7 @@ MonoBehaviour:
   damageFlashAlpha: 0.16
   edgePulseSpeed: 2.2
   edgePulseAlpha: 0.26
+  warningThreshold: 25
 --- !u!4 &872258832
 Transform:
   m_ObjectHideFlags: 0
@@ -6347,7 +6348,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Decoherence.WaveDirector
   spawner: {fileID: 1355362727}
   player: {fileID: 2018958197}
-  profile: {fileID: 11400000, guid: 15f743dd98d1227499ac213a472f78c3, type: 2}
+  scaling:
+    meleeDefinition: {fileID: 11400000, guid: bd80d2f6b0c474b43a6becbfc81767e3, type: 2}
+    rangedDefinition: {fileID: 11400000, guid: 6e13e0e53c25def43b62439284817d53, type: 2}
+    rangedUnlockWave: 3
+    rangedShareBase: 0.15
+    rangedSharePerWave: 0.1
+    rangedShareCap: 0.5
+    baseCount: 12
+    countPerWave: 2
+    countCap: 60
+    baseInterval: 0.5
+    intervalPerWave: 0.01
+    minInterval: 0.2
+    baseMaxAlive: 8
+    aliveStepEvery: 2
+    aliveCap: 30
   rewardDuration: 3
 --- !u!1 &1363749427
 GameObject:
@@ -10596,7 +10612,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Decoherence.PlayerCoherence
   state: {fileID: 0}
   maxCoherence: 100
-  drainPerSecond: 5
+  drainPerSecond: 15
   regenPerSecond: 20
 --- !u!114 &2018958198
 MonoBehaviour:

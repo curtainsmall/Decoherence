@@ -21,6 +21,14 @@ namespace Decoherence
         [SerializeField, Min(1)]
         int maxAlive;
 
+        public WaveEntry(EnemyDefinition[] composition, int count, float interval, int maxAlive)
+        {
+            this.composition = composition;
+            this.count = count;
+            this.interval = interval;
+            this.maxAlive = maxAlive;
+        }
+
         public int Count => Mathf.Max(0, count);
 
         public float Interval => Mathf.Max(0.05f, interval);
@@ -48,32 +56,6 @@ namespace Decoherence
             }
 
             return null;
-        }
-    }
-
-    /// <summary>
-    /// 波次表：每个元素是一波的构成。超过表长时重复最后一波。
-    /// 只描述“出什么”，不描述敌人自身的行为与数值。
-    /// </summary>
-    [CreateAssetMenu(menuName = "Decoherence/Wave Profile", fileName = "WaveProfile")]
-    public sealed class WaveProfile : ScriptableObject
-    {
-        [SerializeField]
-        WaveEntry[] waves;
-
-        public int WaveCount => waves != null ? waves.Length : 0;
-
-        /// <summary>按 1 起的波次号取构成；超出表长时返回最后一波，空表返回空构成。</summary>
-        public WaveEntry GetWave(int waveIndex)
-        {
-            if (waves == null || waves.Length == 0)
-            {
-                return default;
-            }
-
-            int index = Mathf.Clamp(waveIndex - 1, 0, waves.Length - 1);
-
-            return waves[index];
         }
     }
 }

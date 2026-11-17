@@ -9,6 +9,8 @@ Shader "Decoherence/ArenaFence"
         _PostWidth ("Post Half Width", Float) = 0.05
         _RailHeight ("Top Rail Height", Float) = 2.84
         _RailWidth ("Top Rail Half Width", Float) = 0.035
+        _RailGlowColor ("Top Rail Glow Color", Color) = (0.25, 0.85, 1, 1)
+        _RailGlowStrength ("Top Rail Glow Strength", Float) = 0.5
         _Opacity ("Opacity", Range(0, 1)) = 0.92
     }
 
@@ -55,6 +57,8 @@ Shader "Decoherence/ArenaFence"
                 float _PostWidth;
                 float _RailHeight;
                 float _RailWidth;
+                half4 _RailGlowColor;
+                float _RailGlowStrength;
                 float _Opacity;
             CBUFFER_END
 
@@ -86,6 +90,9 @@ Shader "Decoherence/ArenaFence"
 
                 float4 shadowCoord = TransformWorldToShadowCoord(input.positionWS);
                 half3 color = ArenaLight(input, _BaseColor.rgb, shadowCoord);
+
+                // 顶部横撑是发光的约束线
+                color += _RailGlowColor.rgb * (_RailGlowStrength * rail);
 
                 return half4(color, coverage * _Opacity);
             }

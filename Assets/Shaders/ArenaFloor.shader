@@ -9,6 +9,8 @@ Shader "Decoherence/ArenaFloor"
         _MajorSpacing ("Major Spacing", Float) = 2
         _MinorWidth ("Minor Line Half Width", Float) = 0.008
         _MajorWidth ("Major Line Half Width", Float) = 0.012
+        _GlowColor ("Grid Glow Color", Color) = (0.18, 0.55, 0.75, 1)
+        _GlowStrength ("Grid Glow Strength", Float) = 0.35
     }
 
     SubShader
@@ -48,6 +50,8 @@ Shader "Decoherence/ArenaFloor"
                 float _MajorSpacing;
                 float _MinorWidth;
                 float _MajorWidth;
+                half4 _GlowColor;
+                float _GlowStrength;
             CBUFFER_END
 
             half4 frag(ArenaVaryings input) : SV_Target
@@ -65,7 +69,10 @@ Shader "Decoherence/ArenaFloor"
 
                 float4 shadowCoord = TransformWorldToShadowCoord(input.positionWS);
 
-                return half4(ArenaLight(input, albedo, shadowCoord), 1);
+                // 主格线是嵌在地里的自发光条
+                half3 emissive = _GlowColor.rgb * (_GlowStrength * major);
+
+                return half4(ArenaLight(input, albedo, shadowCoord) + emissive, 1);
             }
             ENDHLSL
         }
@@ -100,6 +107,8 @@ Shader "Decoherence/ArenaFloor"
                 float _MajorSpacing;
                 float _MinorWidth;
                 float _MajorWidth;
+                half4 _GlowColor;
+                float _GlowStrength;
             CBUFFER_END
             ENDHLSL
         }

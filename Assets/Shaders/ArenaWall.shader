@@ -8,6 +8,8 @@ Shader "Decoherence/ArenaWall"
         _SeamWidth ("Seam Half Width", Float) = 0.006
         _JointHeight ("Joint Height", Float) = 1.2
         _JointWidth ("Joint Half Width", Float) = 0.006
+        _SeamGlowColor ("Seam Glow Color", Color) = (0.15, 0.45, 0.60, 1)
+        _SeamGlowStrength ("Seam Glow Strength", Float) = 0.12
     }
 
     SubShader
@@ -46,6 +48,8 @@ Shader "Decoherence/ArenaWall"
                 float _SeamWidth;
                 float _JointHeight;
                 float _JointWidth;
+                half4 _SeamGlowColor;
+                float _SeamGlowStrength;
             CBUFFER_END
 
             half4 frag(ArenaVaryings input) : SV_Target
@@ -66,7 +70,10 @@ Shader "Decoherence/ArenaWall"
 
                 float4 shadowCoord = TransformWorldToShadowCoord(input.positionWS);
 
-                return half4(ArenaLight(input, albedo, shadowCoord), 1);
+                // 竖缝发光，让外墙读起来像装配式舱壁
+                half3 emissive = _SeamGlowColor.rgb * (_SeamGlowStrength * seam);
+
+                return half4(ArenaLight(input, albedo, shadowCoord) + emissive, 1);
             }
             ENDHLSL
         }
@@ -100,6 +107,8 @@ Shader "Decoherence/ArenaWall"
                 float _SeamWidth;
                 float _JointHeight;
                 float _JointWidth;
+                half4 _SeamGlowColor;
+                float _SeamGlowStrength;
             CBUFFER_END
             ENDHLSL
         }

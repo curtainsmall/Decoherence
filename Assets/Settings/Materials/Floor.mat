@@ -25,13 +25,15 @@ Material:
     m_TexEnvs: []
     m_Ints: []
     m_Floats:
+    - _GlowStrength: 0
     - _MajorSpacing: 2
     - _MajorWidth: 0.012
     - _MinorSpacing: 0.5
     - _MinorWidth: 0.008
     m_Colors:
     - _BaseColor: {r: 0.15, g: 0.165, b: 0.192, a: 1}
-    - _MajorColor: {r: 0.072, g: 0.08, b: 0.098, a: 1}
-    - _MinorColor: {r: 0.12, g: 0.133, b: 0.159, a: 1}
+    - _GlowColor: {r: 0.1, g: 0.42, b: 0.62, a: 1}
+    - _MajorColor: {r: 0.15, g: 0.165, b: 0.192, a: 1}
+    - _MinorColor: {r: 0.15, g: 0.165, b: 0.192, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

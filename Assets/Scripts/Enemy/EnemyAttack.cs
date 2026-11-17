@@ -29,6 +29,12 @@ namespace Decoherence
 
         public bool InRange => DistanceToTarget() <= Mathf.Max(0f, range);
 
+        /// <summary>射程，决策侧用它在多个攻击里挑"最近的那一招"。</summary>
+        public float Range => range;
+
+        /// <summary>单次伤害，弹丸需要把它传下去。</summary>
+        public float Damage => damage;
+
         protected EnemyState State => state;
 
         protected PlayerCoherence Player => player;

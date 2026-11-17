@@ -3928,6 +3928,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Decoherence.EnemySpawner
   spawnPoints: []
+  fallbackRadius: 22
 --- !u!114 &1355362728
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6286,7 +6287,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Decoherence.PlayerCoherence
   state: {fileID: 0}
   maxCoherence: 100
-  drainPerSecond: 0
+  drainPerSecond: 5
   regenPerSecond: 20
 --- !u!114 &2018958198
 MonoBehaviour:

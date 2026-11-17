@@ -16,6 +16,10 @@ namespace Decoherence
         [SerializeField]
         Transform[] spawnPoints;
 
+        [Tooltip("没有刷怪点时，在自身周围这个半径内随机取点")]
+        [SerializeField, Min(1f)]
+        float fallbackRadius = 22f;
+
         readonly List<GameObject> alive = new List<GameObject>();
 
         public event Action<GameObject> EnemySpawned;
@@ -64,7 +68,7 @@ namespace Decoherence
                 }
             }
 
-            Vector2 offset = UnityEngine.Random.insideUnitCircle * 6f;
+            Vector2 offset = UnityEngine.Random.insideUnitCircle * fallbackRadius;
 
             return transform.position + new Vector3(offset.x, 0f, offset.y);
         }

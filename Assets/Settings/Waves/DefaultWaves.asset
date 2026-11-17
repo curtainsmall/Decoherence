@@ -15,16 +15,23 @@ MonoBehaviour:
   waves:
   - composition:
     - {fileID: 11400000, guid: bd80d2f6b0c474b43a6becbfc81767e3, type: 2}
-    count: 4
-    interval: 1.2
-    maxAlive: 2
+    - {fileID: 11400000, guid: bd80d2f6b0c474b43a6becbfc81767e3, type: 2}
+    - {fileID: 11400000, guid: bd80d2f6b0c474b43a6becbfc81767e3, type: 2}
+    count: 12
+    interval: 0.5
+    maxAlive: 8
   - composition:
     - {fileID: 11400000, guid: bd80d2f6b0c474b43a6becbfc81767e3, type: 2}
-    count: 6
-    interval: 1
-    maxAlive: 3
+    - {fileID: 11400000, guid: bd80d2f6b0c474b43a6becbfc81767e3, type: 2}
+    - {fileID: 11400000, guid: 6e13e0e53c25def43b62439284817d53, type: 2}
+    count: 22
+    interval: 0.4
+    maxAlive: 14
   - composition:
     - {fileID: 11400000, guid: bd80d2f6b0c474b43a6becbfc81767e3, type: 2}
-    count: 8
-    interval: 0.8000001
-    maxAlive: 4
+    - {fileID: 11400000, guid: bd80d2f6b0c474b43a6becbfc81767e3, type: 2}
+    - {fileID: 11400000, guid: 6e13e0e53c25def43b62439284817d53, type: 2}
+    - {fileID: 11400000, guid: 6e13e0e53c25def43b62439284817d53, type: 2}
+    count: 34
+    interval: 0.3
+    maxAlive: 20

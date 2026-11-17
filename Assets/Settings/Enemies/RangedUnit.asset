@@ -1,0 +1,15 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eeedbdddf4bc038479360cba6ecbfab9, type: 3}
+  m_Name: RangedUnit
+  m_EditorClassIdentifier: Assembly-CSharp::Decoherence.EnemyDefinition
+  prefab: {fileID: 8303830872927292320, guid: cee1cdcffdd67bf44a3ceb48599ffcef, type: 3}

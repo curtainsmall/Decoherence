@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace Decoherence
@@ -39,6 +40,9 @@ namespace Decoherence
 
         public bool IsDead => Health <= 0f;
 
+        /// <summary>实际造成的伤害（已按剩余血量截断），计分用它累加。</summary>
+        public event Action<float> Damaged;
+
         void Awake()
         {
             ResolveReferences();
@@ -67,9 +71,13 @@ namespace Decoherence
                 return;
             }
 
-            Health -= amount;
+            // 只统计真正吃掉的血量：超杀部分不计分
+            float applied = Mathf.Min(amount, Health);
+
+            Health -= applied;
 
             hitFlash?.Flash();
+            Damaged?.Invoke(applied);
 
             if (Health <= 0f)
             {

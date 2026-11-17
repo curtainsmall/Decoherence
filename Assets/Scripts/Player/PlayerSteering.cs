@@ -40,6 +40,9 @@ namespace Decoherence
 
         Vector3 smoothedDirection;
 
+        /// <summary>恢复后必须先松开一次鼠标，才重新接受按住输入。</summary>
+        bool requireRelease = true;
+
         void Awake()
         {
             ResolveReferences();
@@ -55,7 +58,22 @@ namespace Decoherence
         {
             float deltaTime = Time.deltaTime;
 
-            if (deltaTime <= 0f || motor == null || state == null)
+            if (motor == null || state == null)
+            {
+                return;
+            }
+
+            // 标题 / 暂停 / 结束时世界被 timeScale 冻结：不读按住输入，并要求下一次重新按下
+            if (Time.timeScale <= 0f)
+            {
+                requireRelease = true;
+                state.HoldIntent = false;
+                motor.ClearIntent();
+
+                return;
+            }
+
+            if (deltaTime <= 0f)
             {
                 return;
             }
@@ -63,7 +81,20 @@ namespace Decoherence
             Mouse mouse = Mouse.current;
 
             // 左右键同义：都可以按住进入退相干
-            state.HoldIntent = mouse != null && (mouse.leftButton.isPressed || mouse.rightButton.isPressed);
+            bool held = mouse != null && (mouse.leftButton.isPressed || mouse.rightButton.isPressed);
+
+            // 按键重按检测：冻结前按住的那一下不算，必须松开再按
+            if (requireRelease)
+            {
+                if (!held)
+                {
+                    requireRelease = false;
+                }
+
+                held = false;
+            }
+
+            state.HoldIntent = held;
 
             if (!state.CanMove)
             {

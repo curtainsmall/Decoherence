@@ -2340,6 +2340,74 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 487428717}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &491338018
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 491338021}
+  - component: {fileID: 491338020}
+  - component: {fileID: 491338022}
+  m_Layer: 0
+  m_Name: GameFlow
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &491338020
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 491338018}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 57808396d7f7a8446a241a81eb98af10, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Decoherence.GameFlow
+  director: {fileID: 1355362728}
+  player: {fileID: 2018958197}
+  score: {fileID: 491338022}
+  hudRoot: {fileID: 872258830}
+  cameraRig: {fileID: 301106474}
+  titleCameraOffset: -5.5
+  introDuration: 0.9
+  holoColor: {r: 0.35, g: 0.9, b: 1, a: 1}
+  gameOverColor: {r: 1, g: 0.45, b: 0.3, a: 1}
+--- !u!4 &491338021
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 491338018}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &491338022
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 491338018}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: badcee044a4c8d14a916c9b9518650e1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Decoherence.ScoreBoard
+  spawner: {fileID: 1355362727}
+  pointsPerDamage: 1
 --- !u!1 &518193007
 GameObject:
   m_ObjectHideFlags: 0
@@ -4161,6 +4229,7 @@ GameObject:
   - component: {fileID: 872258833}
   - component: {fileID: 872258834}
   - component: {fileID: 872258835}
+  - component: {fileID: 872258836}
   m_Layer: 0
   m_Name: Hud
   m_TagString: Untagged
@@ -4260,6 +4329,23 @@ MonoBehaviour:
   readyColor: {r: 0.45, g: 0.9, b: 1, a: 1}
   coolingColor: {r: 0.45, g: 0.9, b: 1, a: 0.35}
   backgroundColor: {r: 0.02, g: 0.03, b: 0.05, a: 0.75}
+--- !u!114 &872258836
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 872258830}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cafdf120066f5e14fbf853de0411056a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Decoherence.ScoreHud
+  score: {fileID: 0}
+  topMargin: 18
+  width: 260
+  labelColor: {r: 1, g: 1, b: 1, a: 0.6}
+  valueColor: {r: 0.75, g: 0.95, b: 1, a: 1}
 --- !u!1 &897169607
 GameObject:
   m_ObjectHideFlags: 0
@@ -10059,7 +10145,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1856655418
 Transform:
   m_ObjectHideFlags: 0
@@ -10818,7 +10904,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Decoherence.PlayerSteering
   motor: {fileID: 2018958198}
   state: {fileID: 2018958199}
-  dash: {fileID: 0}
+  dash: {fileID: 2018958203}
   deadZone: 0.5
   fullSpeedRadius: 4
   pitchSin: 0.7071068
@@ -10867,7 +10953,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Decoherence.PlayerDash
   motor: {fileID: 0}
-  dashDistance: 2
+  dashDistance: 5
   cooldown: 2.5
 --- !u!1 &2055139333
 GameObject:
@@ -11468,3 +11554,4 @@ SceneRoots:
   - {fileID: 406721672}
   - {fileID: 779393184}
   - {fileID: 872258832}
+  - {fileID: 491338021}

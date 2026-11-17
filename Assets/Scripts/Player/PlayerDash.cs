@@ -73,6 +73,12 @@ namespace Decoherence
 
         void Update()
         {
+            // 标题 / 暂停 / 结束时世界被 timeScale 冻结，不接受冲刺输入
+            if (Time.timeScale <= 0f)
+            {
+                return;
+            }
+
             if (Time.time < cooldownUntil)
             {
                 return;

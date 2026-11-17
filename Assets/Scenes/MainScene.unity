@@ -841,8 +841,8 @@ MonoBehaviour:
   state: {fileID: 2018958199}
   coherence: {fileID: 2018958197}
   pillarCount: 8
-  pillarLength: 0.72
-  lowCoherencePillarLength: 1
+  pillarLength: 1.05
+  lowCoherencePillarLength: 1.35
   angularStiffness: 55
   angularDamping: 9
   accelerationGain: 1.5
@@ -903,18 +903,20 @@ MonoBehaviour:
   shadowColor: {r: 0.01, g: 0.012, b: 0.018, a: 1}
   shadowAlpha: 1
   transitionDuration: 0.15
-  puffCount: 84
-  puffRadius: 0.3
+  puffCount: 220
+  puffRadius: 0.52
   puffLifetime: 1.8
-  puffRise: 0.4
+  puffRise: 0.04
   puffWander: 0.07
-  puffGrow: 0.55
-  puffAlpha: 0.7
+  puffGrow: 0.7
+  puffAlpha: 0.8
   edgeFadeWidth: 0.14
-  centerBias: 0.55
+  centerBias: 0.45
+  outerRingWidth: 0.55
+  outerRingAlpha: 0.3
   viewCamera: {fileID: 330585545}
-  baseHeight: 0.12
-  cloudHeight: 0.8
+  baseHeight: 0.05
+  cloudHeight: 0.75
   noiseSpeed: 0.5
   noiseScale: 2.6
 --- !u!1 &897169607

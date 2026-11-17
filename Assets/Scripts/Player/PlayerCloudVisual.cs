@@ -66,6 +66,16 @@ namespace Decoherence
         [SerializeField, Range(0f, 1f)]
         float centerBias = 0.55f;
 
+        [Header("Outer ring")]
+        [Tooltip("触发区之外再铺一圈薄雾的宽度（米）")]
+        [SerializeField, Min(0f)]
+        float outerRingWidth = 0.30f;
+
+        [Tooltip("外环相对主体浓度的比例")]
+        [SerializeField, Range(0f, 1f)]
+        float outerRingAlpha = 0.25f;
+
+
         [Header("Camera")]
         [Tooltip("billboard 朝向用的相机；留空时取 Camera.main")]
         [SerializeField]
@@ -258,6 +268,16 @@ namespace Decoherence
                 boundaryRadius = Mathf.Max(boundaryRadius, Vector2.Distance(boundary[i], core));
             }
 
+            // 外环按面积分配 puff 数量，让它在整个环带里铺满，而不是取一个比例
+            float ringWidth = Mathf.Max(0f, outerRingWidth);
+            float innerArea = Mathf.PI * boundaryRadius * boundaryRadius;
+            float outerRadius = boundaryRadius + ringWidth;
+            float ringArea = Mathf.PI * outerRadius * outerRadius - innerArea;
+            int outerRingCount = ringArea > 0f
+                ? Mathf.RoundToInt(active * (ringArea / (innerArea + ringArea)))
+                : 0;
+            outerRingCount = Mathf.Clamp(outerRingCount, 0, active - 1);
+
             int vertexCount = active * 4;
             int triangleCount = active * 2;
 
@@ -358,11 +378,34 @@ namespace Decoherence
 
                 float alpha = puffAlpha * lifeFade * Mathf.Lerp(0.4f, 1f, edgeFade) * center * valueScale;
 
-                float rise = Mathf.Min(puffRise * phase, cloudHeight);
+                // 碟形：中心最厚、向边界变薄；不随生命周期向上飘升
+                float dishHeight = Mathf.Max(0f, cloudHeight) * (1f - radial * radial);
+                float bob = Mathf.Sin((phase + Hash(i, 7)) * Mathf.PI * 2f) * puffRise;
+
+
+                Vector2 outerDirection = point - core;
+                bool outside = i >= active - outerRingCount;
+
+                if (outside)
+                {
+                    // 外环：按环带面积均布，越往外越淡（先陡后缓）
+                    float random = Hash(i, 10);
+                    float radius = Mathf.Sqrt(Mathf.Max(0f, boundaryRadius * boundaryRadius + random * (outerRadius * outerRadius - boundaryRadius * boundaryRadius)));
+                    float t = ringWidth > 1e-4f ? Mathf.Clamp01((radius - boundaryRadius) / ringWidth) : 0f;
+
+                    if (outerDirection.sqrMagnitude > 1e-6f)
+                    {
+                        point = core + outerDirection.normalized * radius;
+                    }
+
+                    alpha *= outerRingAlpha * (1f - t) * (1f - t);
+                    dishHeight = 0f;
+                    bob = 0f;
+                }
 
                 pendingPosition[i] = new Vector3(
                     point.x,
-                    baseHeight + rise + (Hash(i, 7) - 0.5f) * 0.15f * cloudHeight,
+                    baseHeight + dishHeight + bob,
                     point.y);
 
                 pendingSize[i] = puffRadius * sizeScale * (0.85f + puffGrow * phase);

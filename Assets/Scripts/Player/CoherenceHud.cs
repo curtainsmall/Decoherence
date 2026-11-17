@@ -45,6 +45,10 @@ namespace Decoherence
         [SerializeField, Min(0f)]
         float edgePulseAlpha = 0.26f;
 
+        [Tooltip("相干度低于这个值才开始边缘报警")]
+        [SerializeField, Min(0f)]
+        float warningThreshold = 25f;
+
         GUIStyle stateStyle;
         GUIStyle valueStyle;
         float shownLevel;
@@ -104,9 +108,10 @@ namespace Decoherence
             DrawBar(accent);
             DrawState(accent, decoherent);
 
-            if (decoherent)
+            // 只有相干度低于阈值时才报警，退相干本身不再闪烁
+            if (coherence.Coherence <= warningThreshold)
             {
-                DrawEdgePulse(accent);
+                DrawEdgePulse(decoherentColor);
             }
 
             DrawDamageFlash();

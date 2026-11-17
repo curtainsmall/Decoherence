@@ -30,6 +30,9 @@ namespace Decoherence
         [SerializeField, HideInInspector]
         Collider body;
 
+        [SerializeField, HideInInspector]
+        CharacterHitFlash hitFlash;
+
         public float Health { get; private set; }
 
         public bool IsDead => Health <= 0f;
@@ -63,6 +66,8 @@ namespace Decoherence
             }
 
             Health -= amount;
+
+            hitFlash?.Flash();
 
             if (Health <= 0f)
             {
@@ -112,6 +117,11 @@ namespace Decoherence
             if (body == null)
             {
                 body = GetComponent<Collider>();
+            }
+
+            if (hitFlash == null)
+            {
+                hitFlash = GetComponentInChildren<CharacterHitFlash>(true);
             }
         }
     }

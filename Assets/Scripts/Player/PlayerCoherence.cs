@@ -39,6 +39,9 @@ namespace Decoherence
 
         public event Action StateChanged;
 
+        /// <summary>受到外部伤害时触发，参数是本次扣除量；退相干态的伤害不会触发。</summary>
+        public event Action<float> Damaged;
+
         void Awake()
         {
             if (state == null)
@@ -124,6 +127,8 @@ namespace Decoherence
             }
 
             Coherence -= amount;
+
+            Damaged?.Invoke(amount);
 
             if (Coherence > 0f)
             {

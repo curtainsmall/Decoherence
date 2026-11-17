@@ -108,7 +108,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Decoherence.EnemyAgent
   state: {fileID: 0}
   motor: {fileID: 0}
-  attack: {fileID: 0}
+  attacks: []
 --- !u!114 &1046016032993834947
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -121,12 +121,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3c00b65e1a764a44ba2329895795fa9b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Decoherence.EnemyVitals
-  maxHealth: 36
+  maxHealth: 16
   cloudDamagePerSecond: 30
   state: {fileID: 0}
   cloud: {fileID: 0}
   spawner: {fileID: 0}
   body: {fileID: 0}
+  hitFlash: {fileID: 0}
 --- !u!114 &8933895520751480236
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -3027,6 +3027,61 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 834287128}
   m_Mesh: {fileID: 10206, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &872258830
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 872258832}
+  - component: {fileID: 872258831}
+  m_Layer: 0
+  m_Name: Hud
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &872258831
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 872258830}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 29dc3e73e0495cc4f964e7277e2d4634, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Decoherence.CoherenceHud
+  coherence: {fileID: 0}
+  barSize: {x: 340, y: 16}
+  bottomMargin: 40
+  edgeWidth: 10
+  coherentColor: {r: 0.25, g: 0.85, b: 1, a: 1}
+  decoherentColor: {r: 1, g: 0.32, b: 0.18, a: 1}
+  damageColor: {r: 1, g: 0.15, b: 0.1, a: 1}
+  damageFlashDuration: 0.14
+  damageFlashAlpha: 0.16
+  edgePulseSpeed: 2.2
+  edgePulseAlpha: 0.26
+--- !u!4 &872258832
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 872258830}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &897169607
 GameObject:
   m_ObjectHideFlags: 0
@@ -6223,6 +6278,7 @@ GameObject:
   - component: {fileID: 2018958199}
   - component: {fileID: 2018958200}
   - component: {fileID: 2018958201}
+  - component: {fileID: 2018958202}
   m_Layer: 8
   m_Name: Player
   m_TagString: Untagged
@@ -6354,6 +6410,20 @@ MonoBehaviour:
   enemyLayers:
     serializedVersion: 2
     m_Bits: 0
+--- !u!114 &2018958202
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2018958193}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 702bf3f92b34885498eac99b97a8a87a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Decoherence.PlayerDamageFlash
+  coherence: {fileID: 0}
+  flash: {fileID: 0}
 --- !u!1 &2065836271
 GameObject:
   m_ObjectHideFlags: 0
@@ -6616,3 +6686,4 @@ SceneRoots:
   - {fileID: 1355362726}
   - {fileID: 406721672}
   - {fileID: 779393184}
+  - {fileID: 872258832}

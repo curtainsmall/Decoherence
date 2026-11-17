@@ -287,6 +287,7 @@ GameObject:
   - component: {fileID: 7491204785024791635}
   - component: {fileID: 6921311936716061150}
   - component: {fileID: 8131513312675965794}
+  - component: {fileID: 4296316474000991035}
   m_Layer: 0
   m_Name: CharacterBody
   m_TagString: Untagged
@@ -360,6 +361,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Decoherence.CharacterRig
   bodyRig: {fileID: 6921311936716061150}
   motor: {fileID: 0}
+  state: {fileID: 0}
   headPivot: {fileID: 2574120990999888028}
   hopLength: 0.7
   hopHeight: 0
@@ -377,6 +379,21 @@ MonoBehaviour:
   headLagDistance: 0.02
   headLagResponse: 8
   headCounterTilt: 0.3
+--- !u!114 &4296316474000991035
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6583576036521082600}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6eb0d5d99d25f3d49a2580f54aad0515, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Decoherence.CharacterHitFlash
+  flashColor: {r: 1, g: 0.86, b: 0.82, a: 1}
+  duration: 0.09
+  renderers: []
 --- !u!1 &7705392321384809485
 GameObject:
   m_ObjectHideFlags: 0

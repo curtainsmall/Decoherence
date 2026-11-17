@@ -1528,7 +1528,8 @@ GameObject:
   - component: {fileID: 2018958198}
   - component: {fileID: 2018958199}
   - component: {fileID: 2018958200}
-  m_Layer: 0
+  - component: {fileID: 2018958201}
+  m_Layer: 8
   m_Name: Player
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1643,6 +1644,22 @@ MonoBehaviour:
   fullSpeedRadius: 4
   pitchSin: 0.7071068
   directionSmoothingTimeConstant: 0.05
+--- !u!114 &2018958201
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2018958193}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d2960aa936b10e74cbc480a29aa04dff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Decoherence.PlayerPhasing
+  state: {fileID: 0}
+  enemyLayers:
+    serializedVersion: 2
+    m_Bits: 0
 --- !u!1001 &272622501415702156
 PrefabInstance:
   m_ObjectHideFlags: 0

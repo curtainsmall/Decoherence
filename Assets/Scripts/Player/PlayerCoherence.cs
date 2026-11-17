@@ -109,7 +109,7 @@ namespace Decoherence
             Debug.Log("coherence depleted — run over.", this);
         }
 
-        /// <summary>扣除相干度（受到伤害）。归零即死亡，且只触发一次。</summary>
+        /// <summary>扣除相干度（受到伤害）。退相干态免疫；归零即死亡，且只触发一次。</summary>
         public void Drain(float amount)
         {
             if (IsDead || amount <= 0f)
@@ -117,7 +117,11 @@ namespace Decoherence
                 return;
             }
 
-            bool wasDecoherent = state != null && state.IsDecoherent;
+            // 退相干态是虚体：外部伤害不生效，避免穿过敌人时被接触伤害打掉资源
+            if (state != null && state.IsDecoherent)
+            {
+                return;
+            }
 
             Coherence -= amount;
 
@@ -131,11 +135,6 @@ namespace Decoherence
             if (state != null)
             {
                 state.State = CoherenceState.Coherent;
-            }
-
-            if (wasDecoherent)
-            {
-                StateChanged?.Invoke();
             }
 
             Die();

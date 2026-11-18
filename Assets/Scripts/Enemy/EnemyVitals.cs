@@ -34,6 +34,9 @@ namespace Decoherence
         [SerializeField, HideInInspector]
         CharacterHitFlash hitFlash;
 
+        [SerializeField, HideInInspector]
+        PlayerStats stats;
+
         public float Health { get; private set; }
 
         public float MaxHealth => maxHealth;
@@ -42,6 +45,11 @@ namespace Decoherence
 
         /// <summary>实际造成的伤害（已按剩余血量截断），计分用它累加。</summary>
         public event Action<float> Damaged;
+
+        const float PulseInterval = 0.45f;
+        const float PulseDamage = 13f;
+
+        float pulseTimer;
 
         void Awake()
         {
@@ -58,10 +66,28 @@ namespace Decoherence
 
             if (cloud == null || body == null || !cloud.Overlaps(body))
             {
+                pulseTimer = 0f;
+
                 return;
             }
 
-            ApplyDamage(cloudDamagePerSecond * Time.deltaTime);
+            float scale = stats != null ? stats.Scale(StatKind.CloudDps) : 1f;
+
+            // 脉冲化：接触改成每 0.45 秒结算一次的大伤害
+            if (stats != null && stats.Has(PlayerFlag.PulsedCloud))
+            {
+                pulseTimer += Time.deltaTime;
+
+                if (pulseTimer >= PulseInterval)
+                {
+                    pulseTimer = 0f;
+                    ApplyDamage(PulseDamage * scale);
+                }
+
+                return;
+            }
+
+            ApplyDamage(cloudDamagePerSecond * scale * Time.deltaTime);
         }
 
         public void ApplyDamage(float amount)
@@ -117,6 +143,11 @@ namespace Decoherence
             if (cloud == null)
             {
                 cloud = FindFirstObjectByType<PlayerCloudField>();
+            }
+
+            if (stats == null && cloud != null)
+            {
+                stats = cloud.GetComponentInParent<PlayerStats>();
             }
 
             if (spawner == null)

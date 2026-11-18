@@ -2351,6 +2351,7 @@ GameObject:
   - component: {fileID: 491338021}
   - component: {fileID: 491338020}
   - component: {fileID: 491338022}
+  - component: {fileID: 491338023}
   m_Layer: 0
   m_Name: GameFlow
   m_TagString: Untagged
@@ -2373,6 +2374,7 @@ MonoBehaviour:
   director: {fileID: 1355362728}
   player: {fileID: 2018958197}
   score: {fileID: 491338022}
+  upgradeChoice: {fileID: 491338023}
   hudRoot: {fileID: 872258830}
   cameraRig: {fileID: 301106474}
   titleCameraOffset: -5.5
@@ -2407,7 +2409,29 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Decoherence.ScoreBoard
   spawner: {fileID: 1355362727}
+  stats: {fileID: 0}
   pointsPerDamage: 1
+--- !u!114 &491338023
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 491338018}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 79b668c9d2ac2ad40853ae834d4aae45, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Decoherence.UpgradeChoice
+  director: {fileID: 0}
+  stats: {fileID: 2018958204}
+  catalog: {fileID: 11400000, guid: 103f8c587714a63469282484b043f0e9, type: 2}
+  baseOptionCount: 3
+  cardSize: {x: 230, y: 150}
+  cardGap: 18
+  backdropColor: {r: 0.004, g: 0.008, b: 0.014, a: 0.72}
+  cardColor: {r: 0.02, g: 0.04, b: 0.06, a: 1}
+  accentColor: {r: 0.35, g: 0.9, b: 1, a: 1}
 --- !u!1 &518193007
 GameObject:
   m_ObjectHideFlags: 0
@@ -3009,6 +3033,7 @@ MonoBehaviour:
   motor: {fileID: 2018958198}
   state: {fileID: 2018958199}
   coherence: {fileID: 2018958197}
+  stats: {fileID: 0}
   pillarCount: 8
   pillarLength: 1.05
   lowCoherencePillarLength: 1.35
@@ -10792,6 +10817,7 @@ GameObject:
   - component: {fileID: 2018958201}
   - component: {fileID: 2018958202}
   - component: {fileID: 2018958203}
+  - component: {fileID: 2018958204}
   m_Layer: 8
   m_Name: Player
   m_TagString: Untagged
@@ -10856,9 +10882,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Decoherence.PlayerCoherence
   state: {fileID: 0}
   dash: {fileID: 0}
+  stats: {fileID: 0}
   maxCoherence: 100
   drainPerSecond: 15
   regenPerSecond: 20
+  secondChanceRecoverTime: 0.6
 --- !u!114 &2018958198
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10890,6 +10918,7 @@ MonoBehaviour:
   state: 0
   coherentSpeed: 5
   decoherentSpeed: 12
+  stats: {fileID: 0}
 --- !u!114 &2018958200
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10953,8 +10982,21 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Decoherence.PlayerDash
   motor: {fileID: 0}
+  stats: {fileID: 0}
   dashDistance: 5
   cooldown: 2.5
+--- !u!114 &2018958204
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2018958193}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2e21fb0ec4e93ab47bde72bbe3278cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Decoherence.PlayerStats
 --- !u!1 &2055139333
 GameObject:
   m_ObjectHideFlags: 0

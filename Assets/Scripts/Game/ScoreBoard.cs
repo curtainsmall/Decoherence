@@ -14,6 +14,9 @@ namespace Decoherence
         [SerializeField, HideInInspector]
         EnemySpawner spawner;
 
+        [SerializeField, HideInInspector]
+        PlayerStats stats;
+
         [Header("Scoring")]
         [Tooltip("每 1 点伤害折算的分数")]
         [SerializeField, Min(0f)]
@@ -21,7 +24,7 @@ namespace Decoherence
 
         double totalDamage;
 
-        public int Score => Mathf.FloorToInt((float)(totalDamage * pointsPerDamage));
+        public int Score => Mathf.FloorToInt((float)(totalDamage * pointsPerDamage * (stats != null ? stats.Scale(StatKind.ScoreMultiplier) : 1f)));
 
         public float TotalDamage => (float)totalDamage;
 
@@ -30,6 +33,11 @@ namespace Decoherence
             if (spawner == null)
             {
                 spawner = FindFirstObjectByType<EnemySpawner>();
+            }
+
+            if (stats == null)
+            {
+                stats = FindFirstObjectByType<PlayerStats>();
             }
         }
 

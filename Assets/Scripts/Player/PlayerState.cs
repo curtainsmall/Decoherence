@@ -27,13 +27,32 @@ namespace Decoherence
         [SerializeField, Min(0f)]
         float decoherentSpeed = 7f;
 
+        [SerializeField, HideInInspector]
+        PlayerStats stats;
+
         public CoherenceState State
         {
             get => state;
             set => state = value;
         }
 
-        public override float MaxSpeed => state == CoherenceState.Decoherent ? decoherentSpeed : coherentSpeed;
+        public override float MaxSpeed
+        {
+            get
+            {
+                float baseSpeed = state == CoherenceState.Decoherent ? decoherentSpeed : coherentSpeed;
+
+                return stats != null ? baseSpeed * stats.Scale(StatKind.MoveSpeed) : baseSpeed;
+            }
+        }
+
+        void Awake()
+        {
+            if (stats == null)
+            {
+                stats = GetComponent<PlayerStats>();
+            }
+        }
 
         public bool IsDecoherent => state == CoherenceState.Decoherent;
 

@@ -1,0 +1,99 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 066c0d8444c72484d90a23c6a521a367, type: 3}
+  m_Name: UpgradeCatalog
+  m_EditorClassIdentifier: Assembly-CSharp::Decoherence.UpgradeCatalog
+  entries:
+  - id: capacity
+    title: "\u6269\u5BB9"
+    description: "\u76F8\u5E72\u5EA6\u4E0A\u9650 +20"
+    maxStacks: 3
+    stat: 0
+    value: 20
+    flag: 0
+  - id: efficient
+    title: "\u6DF1\u84C4"
+    description: "\u9000\u76F8\u5E72\u6D88\u8017 \u221210%"
+    maxStacks: 2
+    stat: 1
+    value: -0.1
+    flag: 0
+  - id: recover
+    title: "\u5FEB\u56DE"
+    description: "\u76F8\u5E72\u6001\u56DE\u590D +25%"
+    maxStacks: 3
+    stat: 2
+    value: 0.25
+    flag: 0
+  - id: width
+    title: "\u4E91\u5E45"
+    description: "\u4E91\u534A\u5F84 +15%"
+    maxStacks: 4
+    stat: 3
+    value: 0.15
+    flag: 0
+  - id: dense
+    title: "\u6D53\u4E91"
+    description: "\u4E91\u4F24\u5BB3 +20%"
+    maxStacks: 4
+    stat: 4
+    value: 0.2
+    flag: 0
+  - id: pulse
+    title: "\u8109\u51B2\u5316"
+    description: "\u63A5\u89E6\u4F24\u5BB3\u6539\u4E3A\u6BCF 0.45 \u79D2\u7ED3\u7B97\u4E00\u6B21"
+    maxStacks: 1
+    stat: 4
+    value: 0
+    flag: 1
+  - id: swift
+    title: "\u8F7B\u6B65"
+    description: "\u79FB\u52A8\u901F\u5EA6 +10%"
+    maxStacks: 4
+    stat: 7
+    value: 0.1
+    flag: 0
+  - id: reach
+    title: "\u957F\u8DDD"
+    description: "\u51B2\u523A\u8DDD\u79BB +1 m"
+    maxStacks: 3
+    stat: 5
+    value: 1
+    flag: 0
+  - id: recharge
+    title: "\u901F\u5145"
+    description: "\u51B2\u523A\u51B7\u5374 \u221220%"
+    maxStacks: 3
+    stat: 6
+    value: -0.2
+    flag: 0
+  - id: multiplier
+    title: "\u500D\u7387"
+    description: "\u4F24\u5BB3\u5F97\u5206 \xD71.25"
+    maxStacks: 3
+    stat: 8
+    value: 0.25
+    flag: 0
+  - id: secondchance
+    title: "\u514D\u6B7B"
+    description: "\u4E00\u6B21\u81F4\u547D\u4F24\u5BB3\u540E\u4FDD\u7559 1 \u70B9\u76F8\u5E72\u5EA6"
+    maxStacks: 1
+    stat: 0
+    value: 0
+    flag: 2
+  - id: fourchoices
+    title: "\u56DB\u9009\u4E00"
+    description: "\u4E4B\u540E\u6BCF\u6B21\u5956\u52B1\u53EF\u9009 4 \u4E2A"
+    maxStacks: 1
+    stat: 0
+    value: 0
+    flag: 3

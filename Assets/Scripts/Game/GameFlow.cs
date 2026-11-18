@@ -30,6 +30,9 @@ namespace Decoherence
         [SerializeField, HideInInspector]
         ScoreBoard score;
 
+        [SerializeField, HideInInspector]
+        UpgradeChoice upgradeChoice;
+
         [SerializeField]
         GameObject hudRoot;
 
@@ -84,6 +87,11 @@ namespace Decoherence
                 score = FindFirstObjectByType<ScoreBoard>();
             }
 
+            if (upgradeChoice == null)
+            {
+                upgradeChoice = FindFirstObjectByType<UpgradeChoice>();
+            }
+
             if (cameraRig == null)
             {
                 cameraRig = transform.root.Find("Player/CameraRig");
@@ -126,6 +134,12 @@ namespace Decoherence
             switch (Phase)
             {
                 case GamePhase.Playing:
+                    // 奖励选择期间暂停界面不响应 ESC，避免两个面板叠加
+                    if (upgradeChoice != null && upgradeChoice.IsOpen)
+                    {
+                        break;
+                    }
+
                     if (EscapePressed())
                     {
                         Pause();

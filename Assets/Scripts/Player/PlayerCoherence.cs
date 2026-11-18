@@ -6,7 +6,7 @@ namespace Decoherence
     /// <summary>
     /// coherence 单资源结算。
     /// 该数值同时是攻击预算、机动预算与生命值；归零即结束。
-    /// 状态与输入意图由 PlayerState 提供，本类只做资源的加减与死亡判定。
+    /// 基础值写在本组件的序列化字段里，本局升级带来的修正从 PlayerStats 读。
     /// </summary>
     [DisallowMultipleComponent]
     public sealed class PlayerCoherence : MonoBehaviour
@@ -18,6 +18,9 @@ namespace Decoherence
         [SerializeField, HideInInspector]
         PlayerDash dash;
 
+        [SerializeField, HideInInspector]
+        PlayerStats stats;
+
         [Header("Pool")]
         [SerializeField, Min(1f)]
         float maxCoherence = 100f;
@@ -28,11 +31,18 @@ namespace Decoherence
         [SerializeField, Min(0f)]
         float regenPerSecond = 20f;
 
+        [Header("Second chance")]
+        [Tooltip("免死触发后强制恢复相干态的时长（秒）")]
+        [SerializeField, Min(0f)]
+        float secondChanceRecoverTime = 0.6f;
+
         public float Coherence { get; private set; }
 
-        public float MaxCoherence => maxCoherence;
+        public float MaxCoherence => stats != null
+            ? stats.Resolve(StatKind.MaxCoherence, maxCoherence)
+            : maxCoherence;
 
-        public float Normalized => maxCoherence > 0f ? Coherence / maxCoherence : 0f;
+        public float Normalized => MaxCoherence > 0f ? Mathf.Clamp01(Coherence / MaxCoherence) : 0f;
 
         public bool IsDead => state != null && !state.IsAlive;
 
@@ -44,6 +54,13 @@ namespace Decoherence
 
         /// <summary>受到外部伤害时触发，参数是本次扣除量；退相干态的伤害不会触发。</summary>
         public event Action<float> Damaged;
+
+        float drainBlockedUntil;
+        bool secondChanceUsed;
+
+        float DrainPerSecond => stats != null ? stats.Scale(StatKind.DrainRate) * drainPerSecond : drainPerSecond;
+
+        float RegenPerSecond => stats != null ? stats.Scale(StatKind.RegenRate) * regenPerSecond : regenPerSecond;
 
         void Awake()
         {
@@ -57,7 +74,12 @@ namespace Decoherence
                 dash = GetComponent<PlayerDash>();
             }
 
-            Coherence = maxCoherence;
+            if (stats == null)
+            {
+                stats = GetComponent<PlayerStats>();
+            }
+
+            Coherence = MaxCoherence;
         }
 
         void Update()
@@ -79,25 +101,30 @@ namespace Decoherence
             }
 
             bool wasDecoherent = state.IsDecoherent;
-            bool enter = holding && Coherence > 0f;
+            bool blocked = Time.time < drainBlockedUntil;
+            bool enter = holding && Coherence > 0f && !blocked;
 
             if (enter)
             {
-                Coherence -= drainPerSecond * deltaTime;
+                Coherence -= DrainPerSecond * deltaTime;
 
                 if (Coherence <= 0f)
                 {
-                    Coherence = 0f;
-                    state.State = CoherenceState.Coherent;
-                    OnDied();
-                    return;
+                    if (!TryConsumeSecondChance())
+                    {
+                        Coherence = 0f;
+                        state.State = CoherenceState.Coherent;
+                        OnDied();
+
+                        return;
+                    }
                 }
 
                 state.State = CoherenceState.Decoherent;
             }
             else
             {
-                Coherence = Mathf.Min(maxCoherence, Coherence + regenPerSecond * deltaTime);
+                Coherence = Mathf.Min(MaxCoherence, Coherence + RegenPerSecond * deltaTime);
                 state.State = CoherenceState.Coherent;
             }
 
@@ -149,6 +176,11 @@ namespace Decoherence
                 return;
             }
 
+            if (TryConsumeSecondChance())
+            {
+                return;
+            }
+
             Coherence = 0f;
 
             if (state != null)
@@ -167,7 +199,27 @@ namespace Decoherence
                 return;
             }
 
-            Coherence = Mathf.Min(maxCoherence, Coherence + amount);
+            Coherence = Mathf.Min(MaxCoherence, Coherence + amount);
+        }
+
+        /// <summary>免死：一次致命伤害后保留 1 点，并强制恢复相干态一小段时间。</summary>
+        bool TryConsumeSecondChance()
+        {
+            if (stats == null || secondChanceUsed || !stats.Has(PlayerFlag.SecondChance))
+            {
+                return false;
+            }
+
+            secondChanceUsed = true;
+            Coherence = 1f;
+            drainBlockedUntil = Time.time + secondChanceRecoverTime;
+
+            if (state != null)
+            {
+                state.State = CoherenceState.Coherent;
+            }
+
+            return true;
         }
     }
 }

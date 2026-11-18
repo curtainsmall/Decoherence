@@ -20,6 +20,9 @@ namespace Decoherence
         [SerializeField, HideInInspector]
         PlayerCoherence coherence;
 
+        [SerializeField, HideInInspector]
+        PlayerStats stats;
+
         [Header("Pillars (2D)")]
         [SerializeField, Range(3, 24)]
         int pillarCount = 8;
@@ -120,7 +123,9 @@ namespace Decoherence
 
             CoherenceNormalized = coherence != null ? Mathf.Clamp01(coherence.Normalized) : 1f;
 
-            float length = Mathf.Lerp(lowCoherencePillarLength, pillarLength, CoherenceNormalized);
+            // 升级带来的半径倍率
+            float radiusScale = stats != null ? stats.Scale(StatKind.CloudRadius) : 1f;
+            float length = Mathf.Lerp(lowCoherencePillarLength, pillarLength, CoherenceNormalized) * radiusScale;
 
             SimulatePillars(deltaTime, length);
             BuildBoundary();
@@ -334,6 +339,11 @@ namespace Decoherence
             if (coherence == null)
             {
                 coherence = GetComponentInParent<PlayerCoherence>();
+            }
+
+            if (stats == null)
+            {
+                stats = GetComponentInParent<PlayerStats>();
             }
         }
     }

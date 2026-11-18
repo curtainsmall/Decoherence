@@ -129,6 +129,7 @@ MonoBehaviour:
   spawner: {fileID: 0}
   body: {fileID: 0}
   hitFlash: {fileID: 0}
+  stats: {fileID: 0}
 --- !u!114 &8933895520751480236
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -143,7 +144,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Decoherence.EnemyMeleeAttack
   state: {fileID: 0}
   player: {fileID: 0}
-  damage: 7
+  damage: 30
   cooldown: 0.8
   range: 0.9
 --- !u!114 &2514961490634580920

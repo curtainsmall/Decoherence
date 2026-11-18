@@ -15,6 +15,9 @@ namespace Decoherence
         [SerializeField, HideInInspector]
         CharacterMotor motor;
 
+        [SerializeField, HideInInspector]
+        PlayerStats stats;
+
         [Header("Dash")]
         [Tooltip("一次冲刺的位移距离（米）")]
         [SerializeField, Min(0.2f)]
@@ -28,8 +31,8 @@ namespace Decoherence
         public float CooldownRemaining => Mathf.Max(0f, CooldownRemainingRaw());
 
         /// <summary>1 表示已就绪，0 表示刚用完。</summary>
-        public float CooldownNormalized => cooldown > 0f
-            ? 1f - Mathf.Clamp01(CooldownRemaining / cooldown)
+        public float CooldownNormalized => Cooldown > 0f
+            ? 1f - Mathf.Clamp01(CooldownRemaining / Cooldown)
             : 1f;
 
         /// <summary>冲刺速度：正弦包络，两端趋近 0，中段达到峰值。</summary>
@@ -51,8 +54,16 @@ namespace Decoherence
         /// <summary>冲刺时长，固定值：曲线形状由它和距离共同决定，不对外暴露。</summary>
         const float Duration = 0.15f;
 
+        float Distance => stats != null
+            ? Mathf.Max(0.2f, stats.Resolve(StatKind.DashDistance, dashDistance))
+            : dashDistance;
+
+        float Cooldown => stats != null
+            ? Mathf.Max(0.1f, stats.Scale(StatKind.DashCooldown) * cooldown)
+            : cooldown;
+
         /// <summary>正弦包络下 ∫sin = 2/π，峰值速度 = 距离 · π / (2 · 时长)。</summary>
-        float PeakSpeed => dashDistance * Mathf.PI / (2f * Duration);
+        float PeakSpeed => Distance * Mathf.PI / (2f * Duration);
 
         Vector3 direction;
         float dashUntil;
@@ -68,6 +79,11 @@ namespace Decoherence
             if (motor == null)
             {
                 motor = GetComponent<CharacterMotor>();
+            }
+
+            if (stats == null)
+            {
+                stats = GetComponent<PlayerStats>();
             }
         }
 
@@ -97,7 +113,7 @@ namespace Decoherence
             direction = planar.sqrMagnitude > 1e-4f ? planar.normalized : transform.forward;
 
             dashUntil = Time.time + Duration;
-            cooldownUntil = Mathf.Max(cooldownUntil, Time.time + cooldown);
+            cooldownUntil = Mathf.Max(cooldownUntil, Time.time + Cooldown);
         }
     }
 }
